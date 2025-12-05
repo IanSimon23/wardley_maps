@@ -328,6 +328,251 @@
             border: 1px solid var(--accent-primary);
         }
 
+        /* Strategic Annotations */
+        .annotation-zone {
+            position: absolute;
+            border: 3px dashed;
+            border-radius: 12px;
+            background: rgba(74, 158, 255, 0.05);
+            cursor: move;
+            z-index: 5;
+            pointer-events: all;
+            transition: all 0.2s ease;
+        }
+
+        .annotation-zone:hover {
+            background: rgba(74, 158, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.2);
+        }
+
+        .annotation-zone.opportunity {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .annotation-zone.opportunity:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .annotation-zone.inertia {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .annotation-zone.inertia:hover {
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .annotation-zone.threat {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .annotation-zone.threat:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .annotation-zone.war {
+            border-color: var(--accent-secondary);
+            background: rgba(124, 58, 237, 0.05);
+        }
+
+        .annotation-zone.war:hover {
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .annotation-zone.note {
+            border-color: var(--accent-primary);
+            background: rgba(74, 158, 255, 0.05);
+        }
+
+        .annotation-zone.note:hover {
+            background: rgba(74, 158, 255, 0.1);
+        }
+
+        .zone-note-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--warning);
+            color: var(--bg-primary);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .zone-note-badge:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 12px var(--warning);
+        }
+
+        .annotation-zone-label {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(26, 34, 53, 0.95);
+            border: 1px solid;
+        }
+
+        .annotation-zone.opportunity .annotation-zone-label {
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .annotation-zone.inertia .annotation-zone-label {
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .annotation-zone.threat .annotation-zone-label {
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .annotation-zone.war .annotation-zone-label {
+            color: var(--accent-secondary);
+            border-color: var(--accent-secondary);
+        }
+
+        .zone-delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(26, 34, 53, 0.95);
+            border: 1px solid var(--border);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .annotation-zone:hover .zone-delete-btn {
+            opacity: 1;
+        }
+
+        .zone-delete-btn:hover {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-color: #ef4444;
+        }
+
+        /* Annotation Toolbar */
+        .annotation-toolbar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+        }
+
+        .zoom-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .zoom-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .zoom-btn:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .toolbar-section {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 0.5rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .toolbar-section:last-child {
+            border-right: none;
+        }
+
+        .toolbar-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+
+        .toolbar-btn.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+        }
+
+        .toolbar-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
         .sidebar-section {
             margin-bottom: 2rem;
         }
@@ -397,26 +642,53 @@
             width: 100%;
             height: 100%;
             position: relative;
+            background: var(--bg-primary);
+        }
+
+        /* Zoomable content layer */
+        .canvas-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3000px;
+            height: 2000px;
+            transform-origin: 0 0;
             background:
                 linear-gradient(90deg, rgba(42, 52, 71, 0.3) 1px, transparent 1px),
                 linear-gradient(rgba(42, 52, 71, 0.3) 1px, transparent 1px);
             background-size: 50px 50px;
         }
 
-        /* Evolution Zones */
-        .evolution-zones {
+        /* Fixed UI Layer */
+        .canvas-ui-layer {
             position: absolute;
-            top: 80px;
+            top: 0;
             left: 0;
             right: 0;
-            bottom: 60px;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .canvas-ui-layer > * {
+            pointer-events: auto;
+        }
+
+        /* Evolution Zones - In zoomable content with colored backgrounds */
+        .evolution-zones {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             pointer-events: none;
+            z-index: 0;
         }
 
         .evolution-zone {
             flex: 1;
-            border-right: 1px solid var(--border);
+            border-right: 2px solid var(--border);
             position: relative;
             transition: background 0.3s ease;
         }
@@ -425,33 +697,72 @@
             border-right: none;
         }
 
-        .evolution-zone.highlight {
-            background: rgba(74, 158, 255, 0.05);
+        .evolution-zone[data-stage="genesis"] {
+            background: linear-gradient(to bottom, rgba(124, 58, 237, 0.08), rgba(124, 58, 237, 0.03));
         }
 
-        .zone-label {
+        .evolution-zone[data-stage="custom"] {
+            background: linear-gradient(to bottom, rgba(74, 158, 255, 0.08), rgba(74, 158, 255, 0.03));
+        }
+
+        .evolution-zone[data-stage="product"] {
+            background: linear-gradient(to bottom, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.03));
+        }
+
+        .evolution-zone[data-stage="commodity"] {
+            background: linear-gradient(to bottom, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.03));
+        }
+
+        /* Evolution zone labels - simple, at bottom of zone */
+        .evolution-zone-label {
             position: absolute;
-            bottom: -50px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.75rem;
+            font-size: 1rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
             white-space: nowrap;
+            pointer-events: none;
+            background: rgba(10, 15, 28, 0.9);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 2px solid;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .evolution-zone[data-stage="genesis"] .evolution-zone-label {
+            border-color: var(--genesis);
+            color: var(--genesis);
+        }
+
+        .evolution-zone[data-stage="custom"] .evolution-zone-label {
+            border-color: var(--custom);
+            color: var(--custom);
+        }
+
+        .evolution-zone[data-stage="product"] .evolution-zone-label {
+            border-color: var(--product);
+            color: var(--product);
+        }
+
+        .evolution-zone[data-stage="commodity"] .evolution-zone-label {
+            border-color: var(--commodity);
+            color: var(--commodity);
         }
 
         .zone-color {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 3px;
             display: inline-block;
-            margin-right: 0.5rem;
+            margin-right: 0.75rem;
             vertical-align: middle;
         }
 
-        /* Axis Labels */
+        /* Axis Labels - Y-axis fixed, X-axis removed */
         .axis-label {
             position: absolute;
             font-size: 0.75rem;
@@ -459,6 +770,7 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-secondary);
+            z-index: 2;
         }
 
         .y-axis-label {
@@ -466,11 +778,6 @@
             left: 20px;
             writing-mode: vertical-rl;
             transform: rotate(180deg);
-        }
-
-        .x-axis-label {
-            bottom: 20px;
-            right: 20px;
         }
 
         /* Canvas Node */
@@ -591,11 +898,19 @@
         /* Evolution Arrows */
         .evolution-arrow {
             stroke: var(--warning);
-            stroke-width: 3;
+            stroke-width: 2;
             fill: none;
             opacity: 0.8;
             stroke-dasharray: 0;
             filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.4));
+            cursor: ew-resize;
+            transition: all 0.2s ease;
+        }
+
+        .evolution-arrow:hover {
+            stroke-width: 3;
+            opacity: 1;
+            filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.6));
         }
 
         .evolution-marker {
@@ -847,59 +1162,88 @@
             <!-- Canvas -->
             <div class="canvas-container">
                 <div class="canvas" id="canvas">
-                    <!-- Evolution Zones -->
-                    <div class="evolution-zones">
-                        <div class="evolution-zone" data-stage="genesis">
-                            <span class="zone-label">
-                                <span class="zone-color" style="background: var(--genesis);"></span>
-                                Genesis
-                            </span>
+                    <!-- Zoomable Content Layer -->
+                    <div class="canvas-content" id="canvasContent">
+                        <!-- Evolution Zones (zoom with content, with labels) -->
+                        <div class="evolution-zones">
+                            <div class="evolution-zone" data-stage="genesis">
+                                <div class="evolution-zone-label">
+                                    <span class="zone-color" style="background: var(--genesis);"></span>
+                                    Genesis
+                                </div>
+                            </div>
+                            <div class="evolution-zone" data-stage="custom">
+                                <div class="evolution-zone-label">
+                                    <span class="zone-color" style="background: var(--custom);"></span>
+                                    Custom-Built
+                                </div>
+                            </div>
+                            <div class="evolution-zone" data-stage="product">
+                                <div class="evolution-zone-label">
+                                    <span class="zone-color" style="background: var(--product);"></span>
+                                    Product
+                                </div>
+                            </div>
+                            <div class="evolution-zone" data-stage="commodity">
+                                <div class="evolution-zone-label">
+                                    <span class="zone-color" style="background: var(--commodity);"></span>
+                                    Commodity
+                                </div>
+                            </div>
                         </div>
-                        <div class="evolution-zone" data-stage="custom">
-                            <span class="zone-label">
-                                <span class="zone-color" style="background: var(--custom);"></span>
-                                Custom-Built
-                            </span>
-                        </div>
-                        <div class="evolution-zone" data-stage="product">
-                            <span class="zone-label">
-                                <span class="zone-color" style="background: var(--product);"></span>
-                                Product
-                            </span>
-                        </div>
-                        <div class="evolution-zone" data-stage="commodity">
-                            <span class="zone-label">
-                                <span class="zone-color" style="background: var(--commodity);"></span>
-                                Commodity
-                            </span>
-                        </div>
+
+                        <!-- SVG for connections -->
+                        <svg class="connections" id="connections">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" class="connection-marker" />
+                                </marker>
+                                <marker id="evolution-arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" class="evolution-marker" />
+                                </marker>
+                            </defs>
+                        </svg>
+
+                        <!-- Nodes, annotations, and zones will be rendered here -->
                     </div>
 
-                    <!-- Axis Labels -->
-                    <div class="axis-label y-axis-label">Value Chain (Invisible → Visible)</div>
-                    <div class="axis-label x-axis-label">Evolution →</div>
+                    <!-- Fixed UI Layer -->
+                    <div class="canvas-ui-layer">
+                        <!-- Annotation Toolbar -->
+                        <div class="annotation-toolbar">
+                            <div class="toolbar-section">
+                                <span class="toolbar-label">Add Strategic Zone</span>
+                                <button class="toolbar-btn" onclick="app.addZone('opportunity')">💡 Opportunity</button>
+                                <button class="toolbar-btn" onclick="app.addZone('inertia')">⚠️ Inertia</button>
+                                <button class="toolbar-btn" onclick="app.addZone('threat')">🚨 Threat</button>
+                                <button class="toolbar-btn" onclick="app.addZone('war')">⚔️ War</button>
+                                <button class="toolbar-btn" onclick="app.addZone('note')">📝 Note</button>
+                            </div>
+                        </div>
 
-                    <!-- SVG for connections -->
-                    <svg class="connections" id="connections">
-                        <defs>
-                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                                <polygon points="0 0, 10 3, 0 6" class="connection-marker" />
-                            </marker>
-                            <marker id="evolution-arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto">
-                                <polygon points="0 0, 12 4, 0 8" class="evolution-marker" />
-                            </marker>
-                        </defs>
-                    </svg>
+                        <!-- Y-Axis Label (fixed) -->
+                        <div class="axis-label y-axis-label">Value Chain (Invisible → Visible)</div>
 
-                    <!-- Connection Mode Indicator -->
-                    <div class="connection-mode-indicator" id="connectionModeIndicator">
-                        Click another node to connect
+                        <!-- Connection Mode Indicator -->
+                        <div class="connection-mode-indicator" id="connectionModeIndicator">
+                            Click another node to connect
+                        </div>
+
+                        <!-- Zoom Indicator -->
+                        <div class="zoom-indicator">
+                            <span id="zoomLevel">100%</span>
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" onclick="app.zoomIn()">+</button>
+                                <button class="zoom-btn" onclick="app.resetZoom()">Reset</button>
+                                <button class="zoom-btn" onclick="app.zoomOut()">−</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- AI Coach Panel -->
-            <div class="ai-coach-panel" id="aiCoachPanel">
+            <div class="ai-coach-panel collapsed" id="aiCoachPanel">
                 <div class="coach-header">
                     <div class="coach-title">AI Strategy Coach</div>
                     <div style="display: flex; gap: 0.5rem;">
@@ -1005,7 +1349,19 @@
             draggedNode: null,
             dragOffset: { x: 0, y: 0 },
             coachMessages: [],
-            coachCollapsed: false,
+            coachCollapsed: true,  // Start collapsed
+            zones: [],
+            zoneIdCounter: 0,
+            draggedZone: null,
+            zoomLevel: 1,
+            panX: 0,
+            panY: 0,
+            isPanning: false,
+            panStartX: 0,
+            panStartY: 0,
+            spacePressed: false,
+            draggingEvolution: false,
+            evolutionDragNode: null,
 
             init() {
                 this.loadFromLocalStorage();
@@ -1013,18 +1369,37 @@
                 this.render();
                 this.loadCoachMessages();
 
-                // Set initial coach button state
-                const headerBtn = document.getElementById('coachHeaderBtn');
-                if (!this.coachCollapsed) {
-                    headerBtn.classList.add('active');
-                }
+                // Coach starts collapsed, so button should not be active
             },
 
             setupEventListeners() {
                 const canvas = document.getElementById('canvas');
+                const canvasContent = document.getElementById('canvasContent');
 
                 canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-                canvas.addEventListener('mouseup', () => this.handleMouseUp());
+                canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+
+                // Zoom with scroll wheel
+                canvas.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
+
+                // Space key for panning
+                window.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' && !this.spacePressed) {
+                        this.spacePressed = true;
+                        canvas.style.cursor = 'grab';
+                    }
+                });
+
+                window.addEventListener('keyup', (e) => {
+                    if (e.code === 'Space') {
+                        this.spacePressed = false;
+                        canvas.style.cursor = this.isPanning ? 'grabbing' : 'default';
+                        if (!this.isPanning) {
+                            canvas.style.cursor = 'default';
+                        }
+                    }
+                });
 
                 // Enter key on component input
                 document.getElementById('componentName').addEventListener('keypress', (e) => {
@@ -1075,6 +1450,67 @@
                 this.render();
             },
 
+            handleMouseDown(e) {
+                // Middle mouse button (button 1) or space + left click for panning
+                if (e.button === 1 || (this.spacePressed && e.button === 0)) {
+                    e.preventDefault();
+                    this.isPanning = true;
+                    this.panStartX = e.clientX - this.panX;
+                    this.panStartY = e.clientY - this.panY;
+                    document.getElementById('canvas').style.cursor = 'grabbing';
+                }
+            },
+
+            handleWheel(e) {
+                e.preventDefault();
+
+                const canvas = document.getElementById('canvas');
+                const rect = canvas.getBoundingClientRect();
+
+                // Get mouse position relative to canvas
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Zoom factor
+                const zoomSpeed = 0.1;
+                const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed;
+                const newZoom = Math.max(0.3, Math.min(3, this.zoomLevel + delta));
+
+                // Calculate zoom origin to zoom toward mouse position
+                const zoomRatio = newZoom / this.zoomLevel;
+
+                this.zoomLevel = newZoom;
+                this.applyTransform();
+            },
+
+            applyTransform() {
+                const canvasContent = document.getElementById('canvasContent');
+
+                // Apply zoom and pan to canvas content
+                canvasContent.style.transform = `scale(${this.zoomLevel}) translate(${this.panX}px, ${this.panY}px)`;
+                canvasContent.style.transformOrigin = '0 0';
+
+                // Update zoom indicator
+                document.getElementById('zoomLevel').textContent = `${Math.round(this.zoomLevel * 100)}%`;
+            },
+
+            zoomIn() {
+                this.zoomLevel = Math.min(3, this.zoomLevel + 0.2);
+                this.applyTransform();
+            },
+
+            zoomOut() {
+                this.zoomLevel = Math.max(0.3, this.zoomLevel - 0.2);
+                this.applyTransform();
+            },
+
+            resetZoom() {
+                this.zoomLevel = 1;
+                this.panX = 0;
+                this.panY = 0;
+                this.applyTransform();
+            },
+
             addComponentToCanvas() {
                 const input = document.getElementById('componentName');
                 const label = input.value.trim();
@@ -1106,8 +1542,8 @@
             },
 
             getStageFromPosition(x) {
-                const canvas = document.getElementById('canvas');
-                const width = canvas.offsetWidth;
+                const canvasContent = document.getElementById('canvasContent');
+                const width = canvasContent.offsetWidth;
                 const zoneWidth = width / 4;
 
                 if (x < zoneWidth) return 'genesis';
@@ -1126,8 +1562,8 @@
             },
 
             getStagePosition(stage) {
-                const canvas = document.getElementById('canvas');
-                const width = canvas.offsetWidth;
+                const canvasContent = document.getElementById('canvasContent');
+                const width = canvasContent.offsetWidth;
                 const zoneWidth = width / 4;
 
                 const stagePositions = {
@@ -1159,17 +1595,26 @@
                     // Turn off evolution
                     delete node.evolving;
                     delete node.evolvingTo;
+                    delete node.evolutionTargetX;
                 } else {
                     // Turn on evolution
                     const nextStage = this.getNextStage(node.stage);
                     if (nextStage !== node.stage) {
                         node.evolving = true;
                         node.evolvingTo = nextStage;
+                        // Store target X position (default to center of next stage)
+                        node.evolutionTargetX = this.getStagePosition(nextStage);
                     }
                 }
 
                 this.render();
                 this.saveToLocalStorage();
+            },
+
+            startEvolutionDrag(node, e) {
+                this.draggingEvolution = true;
+                this.evolutionDragNode = node;
+                e.preventDefault();
             },
 
             handleNodeMouseDown(node, e) {
@@ -1184,28 +1629,85 @@
             },
 
             handleMouseMove(e) {
-                if (!this.draggedNode) return;
+                // Handle panning first
+                if (this.isPanning) {
+                    this.panX = e.clientX - this.panStartX;
+                    this.panY = e.clientY - this.panStartY;
+                    this.applyTransform();
+                    return;
+                }
 
                 const canvas = document.getElementById('canvas');
-                const rect = canvas.getBoundingClientRect();
+                const canvasContent = document.getElementById('canvasContent');
+                const rect = canvasContent.getBoundingClientRect();
 
-                const x = e.clientX - rect.left - this.dragOffset.x;
-                const y = e.clientY - rect.top - this.dragOffset.y;
+                // Convert mouse position to canvas coordinates accounting for zoom and pan
+                const mouseX = (e.clientX - rect.left) / this.zoomLevel;
+                const mouseY = (e.clientY - rect.top) / this.zoomLevel;
 
-                this.draggedNode.x = Math.max(0, Math.min(x, rect.width - 150));
-                this.draggedNode.y = Math.max(0, Math.min(y, rect.height - 100));
+                // Handle evolution arrow dragging
+                if (this.draggingEvolution && this.evolutionDragNode) {
+                    this.evolutionDragNode.evolutionTargetX = mouseX;
 
-                // Update stage based on position
-                this.draggedNode.stage = this.getStageFromPosition(this.draggedNode.x);
+                    // Update the evolvingTo stage based on where the arrow points
+                    this.evolutionDragNode.evolvingTo = this.getStageFromPosition(mouseX);
 
-                this.render();
+                    this.render();
+                    return;
+                }
+
+                // Handle node dragging
+                if (this.draggedNode) {
+                    const x = mouseX - this.dragOffset.x;
+                    const y = mouseY - this.dragOffset.y;
+
+                    this.draggedNode.x = Math.max(0, x);
+                    this.draggedNode.y = Math.max(0, y);
+
+                    // Update stage based on position
+                    this.draggedNode.stage = this.getStageFromPosition(this.draggedNode.x);
+
+                    this.render();
+                    return;
+                }
+
+                // Handle zone dragging
+                if (this.draggedZone) {
+                    const x = mouseX - this.dragOffset.x;
+                    const y = mouseY - this.dragOffset.y;
+
+                    this.draggedZone.x = Math.max(0, x);
+                    this.draggedZone.y = Math.max(0, y);
+
+                    this.render();
+                    return;
+                }
             },
 
-            handleMouseUp() {
+            handleMouseUp(e) {
+                // Stop panning
+                if (this.isPanning) {
+                    this.isPanning = false;
+                    const canvas = document.getElementById('canvas');
+                    canvas.style.cursor = this.spacePressed ? 'grab' : 'default';
+                }
+
+                // Stop evolution dragging
+                if (this.draggingEvolution) {
+                    this.draggingEvolution = false;
+                    this.evolutionDragNode = null;
+                    this.saveToLocalStorage();
+                }
+
                 if (this.draggedNode) {
                     const elements = document.querySelectorAll('.canvas-node');
                     elements.forEach(el => el.classList.remove('dragging'));
                     this.draggedNode = null;
+                    this.saveToLocalStorage();
+                }
+
+                if (this.draggedZone) {
+                    this.draggedZone = null;
                     this.saveToLocalStorage();
                 }
             },
@@ -1352,7 +1854,7 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
             },
 
             getMapContext() {
-                if (this.nodes.length === 0) {
+                if (this.nodes.length === 0 && this.zones.length === 0) {
                     return 'The map is currently empty.';
                 }
 
@@ -1388,6 +1890,17 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                 context += `\nDependencies: ${this.connections.length}\n`;
                 context += `Evolving components: ${evolvingNodes.length}\n`;
                 context += `Components with notes: ${notedNodes.length}\n`;
+
+                if (this.zones.length > 0) {
+                    context += `\nStrategic zones (${this.zones.length}):\n`;
+                    this.zones.forEach(zone => {
+                        context += `- ${zone.type.toUpperCase()} zone`;
+                        if (zone.note) {
+                            context += `: ${zone.note.substring(0, 100)}${zone.note.length > 100 ? '...' : ''}`;
+                        }
+                        context += '\n';
+                    });
+                }
 
                 return context;
             },
@@ -1490,6 +2003,7 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
 
             // Component Notes Methods
             currentNoteNodeId: null,
+            currentNoteZoneId: null,
 
             showNoteModal(nodeId) {
                 const node = this.nodes.find(n => n.id === nodeId);
@@ -1507,49 +2021,160 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
             },
 
             saveNote() {
-                if (this.currentNoteNodeId === null) return;
+                // Handle node notes
+                if (this.currentNoteNodeId !== null) {
+                    const node = this.nodes.find(n => n.id === this.currentNoteNodeId);
+                    if (node) {
+                        const noteText = document.getElementById('noteTextarea').value.trim();
+                        if (noteText) {
+                            node.note = noteText;
+                        } else {
+                            delete node.note;
+                        }
+                        this.currentNoteNodeId = null;
+                    }
+                }
 
-                const node = this.nodes.find(n => n.id === this.currentNoteNodeId);
-                if (!node) return;
-
-                const noteText = document.getElementById('noteTextarea').value.trim();
-
-                if (noteText) {
-                    node.note = noteText;
-                } else {
-                    delete node.note;
+                // Handle zone notes
+                if (this.currentNoteZoneId !== null) {
+                    const zone = this.zones.find(z => z.id === this.currentNoteZoneId);
+                    if (zone) {
+                        const noteText = document.getElementById('noteTextarea').value.trim();
+                        if (noteText) {
+                            zone.note = noteText;
+                        } else {
+                            delete zone.note;
+                        }
+                        this.currentNoteZoneId = null;
+                    }
                 }
 
                 this.closeModal('noteModal');
                 this.render();
                 this.saveToLocalStorage();
-                this.currentNoteNodeId = null;
             },
 
             deleteNote() {
-                if (this.currentNoteNodeId === null) return;
+                // Handle node notes
+                if (this.currentNoteNodeId !== null) {
+                    const node = this.nodes.find(n => n.id === this.currentNoteNodeId);
+                    if (node) {
+                        if (node.note && !confirm('Delete this note?')) return;
+                        delete node.note;
+                        this.currentNoteNodeId = null;
+                    }
+                }
 
-                const node = this.nodes.find(n => n.id === this.currentNoteNodeId);
-                if (!node) return;
+                // Handle zone notes
+                if (this.currentNoteZoneId !== null) {
+                    const zone = this.zones.find(z => z.id === this.currentNoteZoneId);
+                    if (zone) {
+                        if (zone.note && !confirm('Delete this note?')) return;
+                        delete zone.note;
+                        this.currentNoteZoneId = null;
+                    }
+                }
 
-                if (node.note && !confirm('Delete this note?')) return;
-
-                delete node.note;
                 this.closeModal('noteModal');
                 this.render();
                 this.saveToLocalStorage();
-                this.currentNoteNodeId = null;
+            },
+
+            // Strategic Annotations Methods
+            addZone(type) {
+                const zone = {
+                    id: this.zoneIdCounter++,
+                    type: type,
+                    x: 500,
+                    y: 300 + (this.zones.length * 50),
+                    width: 300,
+                    height: 200
+                };
+
+                this.zones.push(zone);
+                this.render();
+                this.saveToLocalStorage();
+            },
+
+            showZoneNoteModal(zoneId) {
+                const zone = this.zones.find(z => z.id === zoneId);
+                if (!zone) return;
+
+                this.currentNoteZoneId = zoneId;
+                this.currentNoteNodeId = null; // Clear node note id
+                document.getElementById('noteModalSubtitle').textContent = `Notes for: ${zone.type} zone`;
+                document.getElementById('noteTextarea').value = zone.note || '';
+                document.getElementById('noteModal').classList.add('active');
+
+                // Focus textarea
+                setTimeout(() => {
+                    document.getElementById('noteTextarea').focus();
+                }, 100);
+            },
+
+            renderZones() {
+                const canvasContent = document.getElementById('canvasContent');
+                const existingZones = canvasContent.querySelectorAll('.annotation-zone');
+                existingZones.forEach(zone => zone.remove());
+
+                this.zones.forEach(zone => {
+                    const zoneEl = document.createElement('div');
+                    zoneEl.className = `annotation-zone ${zone.type}`;
+                    zoneEl.style.left = zone.x + 'px';
+                    zoneEl.style.top = zone.y + 'px';
+                    zoneEl.style.width = zone.width + 'px';
+                    zoneEl.style.height = zone.height + 'px';
+
+                    // Add note badge if zone has notes
+                    const noteBadge = zone.note ? `<div class="zone-note-badge" onclick="event.stopPropagation(); app.showZoneNoteModal(${zone.id})" title="View/Edit Note">💭</div>` : '';
+
+                    zoneEl.innerHTML = `
+                        ${noteBadge}
+                        <div class="annotation-zone-label">${zone.type}</div>
+                        <button class="zone-delete-btn" onclick="app.deleteZone(${zone.id})">Delete</button>
+                    `;
+
+                    zoneEl.addEventListener('mousedown', (e) => {
+                        // Don't start drag if clicking delete button or note badge
+                        if (e.target.classList.contains('zone-delete-btn') || e.target.classList.contains('zone-note-badge')) return;
+                        this.handleZoneMouseDown(zone, e, zoneEl);
+                    });
+
+                    // Double-click to add/edit note
+                    zoneEl.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                        this.showZoneNoteModal(zone.id);
+                    });
+
+                    canvasContent.appendChild(zoneEl);
+                });
+            },
+
+            handleZoneMouseDown(zone, e, element) {
+                this.draggedZone = zone;
+                const rect = element.getBoundingClientRect();
+                this.dragOffset = {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            },
+
+            deleteZone(zoneId) {
+                this.zones = this.zones.filter(z => z.id !== zoneId);
+                this.render();
+                this.saveToLocalStorage();
             },
 
             render() {
                 this.renderNodes();
                 this.renderConnections();
                 this.renderComponentList();
+                this.renderZones();
             },
 
             renderNodes() {
-                const canvas = document.getElementById('canvas');
-                const existingNodes = canvas.querySelectorAll('.canvas-node');
+                const canvasContent = document.getElementById('canvasContent');
+                const existingNodes = canvasContent.querySelectorAll('.canvas-node');
                 existingNodes.forEach(node => node.remove());
 
                 this.nodes.forEach(node => {
@@ -1583,14 +2208,14 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                     `;
 
                     nodeEl.addEventListener('mousedown', (e) => this.handleNodeMouseDown(node, e));
-                    canvas.appendChild(nodeEl);
+                    canvasContent.appendChild(nodeEl);
                 });
             },
 
             renderConnections() {
                 const svg = document.getElementById('connections');
-                const canvas = document.getElementById('canvas');
-                const canvasWidth = canvas.offsetWidth;
+                const canvasContent = document.getElementById('canvasContent');
+                const canvasWidth = canvasContent.offsetWidth;
 
                 svg.innerHTML = `
                     <defs>
@@ -1630,15 +2255,12 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                     }
                 });
 
-                // Draw evolution arrows - use percentage-based target positions
+                // Draw evolution arrows - use stored target position
                 this.nodes.forEach(node => {
-                    if (node.evolving && node.evolvingTo) {
+                    if (node.evolving && node.evolvingTo && node.evolutionTargetX !== undefined) {
                         const startX = node.x + 60;
                         const startY = node.y + 35;
-
-                        // Calculate target position based on percentage of canvas width
-                        const targetPercent = this.getStagePercentage(node.evolvingTo);
-                        const endX = (canvasWidth * targetPercent) / 100;
+                        const endX = node.evolutionTargetX;
                         const endY = startY;
 
                         // Create arrow path
@@ -1649,6 +2271,16 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                         arrow.setAttribute('y2', endY);
                         arrow.setAttribute('class', 'evolution-arrow');
                         arrow.setAttribute('marker-end', 'url(#evolution-arrowhead)');
+                        arrow.setAttribute('data-node-id', node.id);
+                        arrow.style.cursor = 'ew-resize';
+                        arrow.style.pointerEvents = 'stroke';
+                        arrow.style.strokeWidth = '10'; // Wider hit area
+
+                        // Make arrow draggable to adjust length
+                        arrow.addEventListener('mousedown', (e) => {
+                            e.stopPropagation();
+                            this.startEvolutionDrag(node, e);
+                        });
 
                         svg.appendChild(arrow);
 
@@ -1661,6 +2293,7 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                         label.setAttribute('text-anchor', 'middle');
                         label.setAttribute('class', 'evolution-label');
                         label.textContent = 'evolving';
+                        label.style.pointerEvents = 'none';
 
                         svg.appendChild(label);
                     }
@@ -1687,10 +2320,12 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
             },
 
             clearCanvas() {
-                if (confirm('Are you sure you want to clear the entire map?')) {
+                if (confirm('Are you sure you want to clear the entire map, including all zones?')) {
                     this.nodes = [];
                     this.connections = [];
+                    this.zones = [];
                     this.nodeIdCounter = 0;
+                    this.zoneIdCounter = 0;
                     this.render();
                     this.saveToLocalStorage();
                 }
@@ -1699,7 +2334,8 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
             showExportModal() {
                 const data = {
                     nodes: this.nodes,
-                    connections: this.connections
+                    connections: this.connections,
+                    zones: this.zones
                 };
                 document.getElementById('exportData').value = JSON.stringify(data, null, 2);
                 document.getElementById('exportModal').classList.add('active');
@@ -1736,7 +2372,9 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                     const data = JSON.parse(document.getElementById('importData').value);
                     this.nodes = data.nodes || [];
                     this.connections = data.connections || [];
+                    this.zones = data.zones || [];
                     this.nodeIdCounter = Math.max(...this.nodes.map(n => n.id), 0) + 1;
+                    this.zoneIdCounter = Math.max(...this.zones.map(z => z.id), 0) + 1;
                     this.render();
                     this.saveToLocalStorage();
                     this.closeModal('importModal');
@@ -1750,7 +2388,9 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                 const data = {
                     nodes: this.nodes,
                     connections: this.connections,
-                    nodeIdCounter: this.nodeIdCounter
+                    nodeIdCounter: this.nodeIdCounter,
+                    zones: this.zones,
+                    zoneIdCounter: this.zoneIdCounter
                 };
                 localStorage.setItem('wardleyMapData', JSON.stringify(data));
             },
@@ -1763,6 +2403,8 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                         this.nodes = parsed.nodes || [];
                         this.connections = parsed.connections || [];
                         this.nodeIdCounter = parsed.nodeIdCounter || 0;
+                        this.zones = parsed.zones || [];
+                        this.zoneIdCounter = parsed.zoneIdCounter || 0;
                     } catch (e) {
                         console.error('Failed to load data from localStorage');
                     }
