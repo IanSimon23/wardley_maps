@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wardley Mapper - Strategic Mapping Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300;400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0f1c;
+            --bg-secondary: #121829;
+            --bg-tertiary: #1a2235;
+            --accent-primary: #4a9eff;
+            --accent-secondary: #7c3aed;
+            --text-primary: #e8edf4;
+            --text-secondary: #9ca5b8;
+            --text-muted: #5a6376;
+            --border: #2a3447;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --genesis: #7c3aed;
+            --custom: #4a9eff;
+            --product: #10b981;
+            --commodity: #f59e0b;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        button {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+        }
+
+        button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 158, 255, 0.3);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        /* AI Coach Panel */
+        .ai-coach-panel {
+            width: 400px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .ai-coach-panel.collapsed {
+            margin-right: -400px;
+        }
+
+        .coach-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .coach-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .coach-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+
+        .coach-toggle:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .coach-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .coach-message {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .message-role {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .message-content {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .coach-message.assistant .message-content {
+            background: linear-gradient(135deg, rgba(74, 158, 255, 0.1), rgba(124, 58, 237, 0.1));
+            border-color: var(--accent-primary);
+        }
+
+        .message-content p {
+            margin-bottom: 0.75rem;
+        }
+
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-content ul, .message-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .message-content li {
+            margin-bottom: 0.25rem;
+        }
+
+        .message-content strong {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .message-content code {
+            background: var(--bg-primary);
+            padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.85em;
+            color: var(--accent-primary);
+        }
+
+        .coach-input-area {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg-primary);
+        }
+
+        .quick-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .quick-prompt {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-prompt:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+
+        .coach-input-form {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .coach-input {
+            flex: 1;
+        }
+
+        .coach-input input {
+            width: 100%;
+        }
+
+        .coach-send-btn {
+            padding: 0.75rem 1.25rem;
+            white-space: nowrap;
+        }
+
+        .coach-loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .coach-header-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .coach-header-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 158, 255, 0.3);
+        }
+
+        .coach-header-btn.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--accent-primary);
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-title {
+            font-family: 'Fraunces', serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .component-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .component-item {
+            background: var(--bg-tertiary);
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: move;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .component-item:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+
+        .add-component-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        input[type="text"] {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+        }
+
+        /* Canvas */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background:
+                linear-gradient(90deg, rgba(42, 52, 71, 0.3) 1px, transparent 1px),
+                linear-gradient(rgba(42, 52, 71, 0.3) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* Evolution Zones */
+        .evolution-zones {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            right: 0;
+            bottom: 60px;
+            display: flex;
+            pointer-events: none;
+        }
+
+        .evolution-zone {
+            flex: 1;
+            border-right: 1px solid var(--border);
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        .evolution-zone:last-child {
+            border-right: none;
+        }
+
+        .evolution-zone.highlight {
+            background: rgba(74, 158, 255, 0.05);
+        }
+
+        .zone-label {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .zone-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Axis Labels */
+        .axis-label {
+            position: absolute;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .y-axis-label {
+            top: 40px;
+            left: 20px;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+
+        .x-axis-label {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        /* Canvas Node */
+        .canvas-node {
+            position: absolute;
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent-primary);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            cursor: move;
+            min-width: 120px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .canvas-node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(74, 158, 255, 0.4);
+            z-index: 20;
+        }
+
+        .canvas-node.dragging {
+            opacity: 0.8;
+            cursor: grabbing;
+            z-index: 30;
+        }
+
+        .node-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .node-stage {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .node-note-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--warning);
+            color: var(--bg-primary);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 5;
+        }
+
+        .node-note-badge:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 12px var(--warning);
+        }
+
+        .canvas-node:hover .node-note-badge {
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .node-actions {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .canvas-node:hover .node-actions {
+            opacity: 1;
+        }
+
+        .node-action-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+            border-radius: 4px;
+        }
+
+        /* Connection Lines */
+        svg.connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .connection-line {
+            stroke: var(--accent-primary);
+            stroke-width: 2;
+            fill: none;
+            opacity: 0.6;
+            stroke-dasharray: 5, 5;
+        }
+
+        .connection-marker {
+            fill: var(--accent-primary);
+        }
+
+        /* Evolution Arrows */
+        .evolution-arrow {
+            stroke: var(--warning);
+            stroke-width: 3;
+            fill: none;
+            opacity: 0.8;
+            stroke-dasharray: 0;
+            filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.4));
+        }
+
+        .evolution-marker {
+            fill: var(--warning);
+        }
+
+        .evolution-label {
+            fill: var(--warning);
+            font-size: 0.7rem;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Connection Mode Indicator */
+        .connection-mode-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            animation: pulse 2s infinite;
+            display: none;
+        }
+
+        .connection-mode-indicator.active {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Info Panel */
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            max-width: 300px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .info-title {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .info-text {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcuts {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            margin-top: 0.75rem;
+        }
+
+        .shortcut {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .shortcut-key {
+            background: var(--bg-tertiary);
+            padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            font-family: monospace;
+            color: var(--accent-primary);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        textarea.note-textarea {
+            font-family: 'DM Sans', sans-serif;
+            min-height: 150px;
+            line-height: 1.6;
+        }
+
+        .note-preview {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .note-preview:empty::before {
+            content: 'Note preview will appear here...';
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .modal-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">Wardley Mapper</div>
+            <div class="header-actions">
+                <button onclick="app.clearCanvas()">Clear</button>
+                <button onclick="app.showExportModal()">Export</button>
+                <button onclick="app.showImportModal()">Import</button>
+                <button class="primary" onclick="app.saveToLocalStorage()">Save</button>
+                <button class="coach-header-btn" id="coachHeaderBtn" onclick="app.toggleCoach()">
+                    🤖 AI Coach
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Container -->
+        <div class="main-container">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Add Component</div>
+                    <div class="add-component-form">
+                        <input type="text" id="componentName" placeholder="Component name..." />
+                        <button class="primary" onclick="app.addComponentToCanvas()">Add to Canvas</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Components</div>
+                    <div class="component-list" id="componentList">
+                        <!-- Components will be listed here -->
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Instructions</div>
+                    <div class="info-text">
+                        <p style="margin-bottom: 0.75rem;">Drag components onto the canvas and position them based on their evolutionary stage.</p>
+                        <div class="keyboard-shortcuts">
+                            <div class="shortcut">
+                                <span>Click node</span>
+                                <span class="shortcut-key">Select</span>
+                            </div>
+                            <div class="shortcut">
+                                <span>Drag node</span>
+                                <span class="shortcut-key">Move</span>
+                            </div>
+                            <div class="shortcut">
+                                <span>Evolve button</span>
+                                <span class="shortcut-key">Show evolution</span>
+                            </div>
+                            <div class="shortcut">
+                                <span>Connect button</span>
+                                <span class="shortcut-key">Link nodes</span>
+                            </div>
+                            <div class="shortcut">
+                                <span>Delete button</span>
+                                <span class="shortcut-key">Remove</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas -->
+            <div class="canvas-container">
+                <div class="canvas" id="canvas">
+                    <!-- Evolution Zones -->
+                    <div class="evolution-zones">
+                        <div class="evolution-zone" data-stage="genesis">
+                            <span class="zone-label">
+                                <span class="zone-color" style="background: var(--genesis);"></span>
+                                Genesis
+                            </span>
+                        </div>
+                        <div class="evolution-zone" data-stage="custom">
+                            <span class="zone-label">
+                                <span class="zone-color" style="background: var(--custom);"></span>
+                                Custom-Built
+                            </span>
+                        </div>
+                        <div class="evolution-zone" data-stage="product">
+                            <span class="zone-label">
+                                <span class="zone-color" style="background: var(--product);"></span>
+                                Product
+                            </span>
+                        </div>
+                        <div class="evolution-zone" data-stage="commodity">
+                            <span class="zone-label">
+                                <span class="zone-color" style="background: var(--commodity);"></span>
+                                Commodity
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Axis Labels -->
+                    <div class="axis-label y-axis-label">Value Chain (Invisible → Visible)</div>
+                    <div class="axis-label x-axis-label">Evolution →</div>
+
+                    <!-- SVG for connections -->
+                    <svg class="connections" id="connections">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" class="connection-marker" />
+                            </marker>
+                            <marker id="evolution-arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto">
+                                <polygon points="0 0, 12 4, 0 8" class="evolution-marker" />
+                            </marker>
+                        </defs>
+                    </svg>
+
+                    <!-- Connection Mode Indicator -->
+                    <div class="connection-mode-indicator" id="connectionModeIndicator">
+                        Click another node to connect
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Coach Panel -->
+            <div class="ai-coach-panel" id="aiCoachPanel">
+                <div class="coach-header">
+                    <div class="coach-title">AI Strategy Coach</div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="coach-toggle" onclick="app.clearCoachHistory()" title="Clear chat history">🗑️</button>
+                        <button class="coach-toggle" onclick="app.toggleCoach()">✕</button>
+                    </div>
+                </div>
+                <div class="coach-messages" id="coachMessages">
+                    <div class="coach-message assistant">
+                        <div class="message-role">AI Coach</div>
+                        <div class="message-content">
+                            <p>👋 Hello! I'm your Wardley Mapping strategy coach.</p>
+                            <p>I can help you:</p>
+                            <ul>
+                                <li><strong>Analyze your map</strong> - Identify strategic opportunities and risks</li>
+                                <li><strong>Learn concepts</strong> - Understand evolution, inertia, gameplay</li>
+                                <li><strong>Get suggestions</strong> - Find where to innovate, optimize, or partner</li>
+                                <li><strong>Challenge assumptions</strong> - Spot gaps in your strategy</li>
+                            </ul>
+                            <p>Try the quick prompts below or ask me anything!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="coach-input-area">
+                    <div class="quick-prompts">
+                        <button class="quick-prompt" onclick="app.sendQuickPrompt('Analyze my current map')">
+                            📊 Analyze Map
+                        </button>
+                        <button class="quick-prompt" onclick="app.sendQuickPrompt('What strategic opportunities do you see?')">
+                            💡 Find Opportunities
+                        </button>
+                        <button class="quick-prompt" onclick="app.sendQuickPrompt('What should be evolving?')">
+                            ⚡ Evolution Check
+                        </button>
+                        <button class="quick-prompt" onclick="app.sendQuickPrompt('Explain Genesis vs Commodity')">
+                            📚 Learn Concepts
+                        </button>
+                    </div>
+                    <div class="coach-input-form">
+                        <div class="coach-input">
+                            <input type="text" id="coachInput" placeholder="Ask about your strategy..." />
+                        </div>
+                        <button class="coach-send-btn primary" onclick="app.sendCoachMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal">
+            <div class="modal-title">Export Map</div>
+            <div class="modal-content">
+                <textarea id="exportData" readonly></textarea>
+            </div>
+            <div class="modal-actions">
+                <button onclick="app.copyExportData()">Copy to Clipboard</button>
+                <button onclick="app.downloadExport()">Download JSON</button>
+                <button onclick="app.closeModal('exportModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal-overlay" id="importModal">
+        <div class="modal">
+            <div class="modal-title">Import Map</div>
+            <div class="modal-content">
+                <textarea id="importData" placeholder="Paste your JSON data here..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="primary" onclick="app.importData()">Import</button>
+                <button onclick="app.closeModal('importModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div class="modal-overlay" id="noteModal">
+        <div class="modal">
+            <div class="modal-title">Component Note</div>
+            <div class="modal-subtitle" id="noteModalSubtitle">Add context, assumptions, or strategic insights</div>
+            <div class="modal-content">
+                <textarea id="noteTextarea" class="note-textarea" placeholder="Add notes about this component...&#10;&#10;Examples:&#10;- Key assumptions&#10;- Risks or concerns&#10;- Strategic rationale&#10;- Dependencies to explore"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="primary" onclick="app.saveNote()">Save Note</button>
+                <button onclick="app.deleteNote()" style="background: var(--bg-tertiary); color: var(--text-secondary);">Clear Note</button>
+                <button onclick="app.closeModal('noteModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const app = {
+            nodes: [],
+            connections: [],
+            nodeIdCounter: 0,
+            selectedNode: null,
+            connectionMode: false,
+            connectionSource: null,
+            draggedNode: null,
+            dragOffset: { x: 0, y: 0 },
+            coachMessages: [],
+            coachCollapsed: false,
+
+            init() {
+                this.loadFromLocalStorage();
+                this.setupEventListeners();
+                this.render();
+                this.loadCoachMessages();
+
+                // Set initial coach button state
+                const headerBtn = document.getElementById('coachHeaderBtn');
+                if (!this.coachCollapsed) {
+                    headerBtn.classList.add('active');
+                }
+            },
+
+            setupEventListeners() {
+                const canvas = document.getElementById('canvas');
+
+                canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                canvas.addEventListener('mouseup', () => this.handleMouseUp());
+
+                // Enter key on component input
+                document.getElementById('componentName').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addComponentToCanvas();
+                });
+
+                // Enter key on coach input
+                document.getElementById('coachInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendCoachMessage();
+                });
+
+                // Load example map on first visit
+                if (this.nodes.length === 0) {
+                    this.loadExampleMap();
+                }
+            },
+
+            loadExampleMap() {
+                const exampleNodes = [
+                    { id: 0, label: 'User Needs', x: 200, y: 100, stage: 'custom' },
+                    { id: 1, label: 'Web Interface', x: 200, y: 200, stage: 'product' },
+                    { id: 2, label: 'API', x: 300, y: 280, stage: 'product' },
+                    { id: 3, label: 'Database', x: 500, y: 320, stage: 'commodity' },
+                    { id: 4, label: 'Hosting', x: 600, y: 360, stage: 'commodity' },
+                    {
+                        id: 5,
+                        label: 'AI Model',
+                        x: 100,
+                        y: 300,
+                        stage: 'genesis',
+                        evolving: true,
+                        evolvingTo: 'custom',
+                        note: 'Investing heavily here. Current accuracy: 87%. Target: 95% by Q3. Risk: competitors may commoditize faster than expected.'
+                    },
+                ];
+
+                const exampleConnections = [
+                    { from: 0, to: 1 },
+                    { from: 1, to: 2 },
+                    { from: 2, to: 3 },
+                    { from: 3, to: 4 },
+                    { from: 1, to: 5 },
+                ];
+
+                this.nodes = exampleNodes;
+                this.connections = exampleConnections;
+                this.nodeIdCounter = 6;
+                this.render();
+            },
+
+            addComponentToCanvas() {
+                const input = document.getElementById('componentName');
+                const label = input.value.trim();
+
+                if (!label) return;
+
+                const node = {
+                    id: this.nodeIdCounter++,
+                    label: label,
+                    x: 300,
+                    y: 200,
+                    stage: 'custom'
+                };
+
+                this.nodes.push(node);
+                input.value = '';
+                this.render();
+                this.saveToLocalStorage();
+            },
+
+            getStageColor(stage) {
+                const colors = {
+                    genesis: 'var(--genesis)',
+                    custom: 'var(--custom)',
+                    product: 'var(--product)',
+                    commodity: 'var(--commodity)'
+                };
+                return colors[stage] || colors.custom;
+            },
+
+            getStageFromPosition(x) {
+                const canvas = document.getElementById('canvas');
+                const width = canvas.offsetWidth;
+                const zoneWidth = width / 4;
+
+                if (x < zoneWidth) return 'genesis';
+                if (x < zoneWidth * 2) return 'custom';
+                if (x < zoneWidth * 3) return 'product';
+                return 'commodity';
+            },
+
+            getNextStage(currentStage) {
+                const stages = ['genesis', 'custom', 'product', 'commodity'];
+                const currentIndex = stages.indexOf(currentStage);
+                if (currentIndex < stages.length - 1) {
+                    return stages[currentIndex + 1];
+                }
+                return currentStage; // Already at commodity
+            },
+
+            getStagePosition(stage) {
+                const canvas = document.getElementById('canvas');
+                const width = canvas.offsetWidth;
+                const zoneWidth = width / 4;
+
+                const stagePositions = {
+                    'genesis': zoneWidth * 0.5,
+                    'custom': zoneWidth * 1.5,
+                    'product': zoneWidth * 2.5,
+                    'commodity': zoneWidth * 3.5
+                };
+
+                return stagePositions[stage] || zoneWidth * 1.5;
+            },
+
+            getStagePercentage(stage) {
+                // Return percentage of canvas width for each stage center
+                const percentages = {
+                    'genesis': 12.5,    // Center of first quarter
+                    'custom': 37.5,     // Center of second quarter
+                    'product': 62.5,    // Center of third quarter
+                    'commodity': 87.5   // Center of fourth quarter
+                };
+                return percentages[stage] || 37.5;
+            },
+
+            toggleEvolution(nodeId) {
+                const node = this.nodes.find(n => n.id === nodeId);
+                if (!node) return;
+
+                if (node.evolving) {
+                    // Turn off evolution
+                    delete node.evolving;
+                    delete node.evolvingTo;
+                } else {
+                    // Turn on evolution
+                    const nextStage = this.getNextStage(node.stage);
+                    if (nextStage !== node.stage) {
+                        node.evolving = true;
+                        node.evolvingTo = nextStage;
+                    }
+                }
+
+                this.render();
+                this.saveToLocalStorage();
+            },
+
+            handleNodeMouseDown(node, e) {
+                e.stopPropagation();
+                this.draggedNode = node;
+                const rect = e.currentTarget.getBoundingClientRect();
+                this.dragOffset = {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+                e.currentTarget.classList.add('dragging');
+            },
+
+            handleMouseMove(e) {
+                if (!this.draggedNode) return;
+
+                const canvas = document.getElementById('canvas');
+                const rect = canvas.getBoundingClientRect();
+
+                const x = e.clientX - rect.left - this.dragOffset.x;
+                const y = e.clientY - rect.top - this.dragOffset.y;
+
+                this.draggedNode.x = Math.max(0, Math.min(x, rect.width - 150));
+                this.draggedNode.y = Math.max(0, Math.min(y, rect.height - 100));
+
+                // Update stage based on position
+                this.draggedNode.stage = this.getStageFromPosition(this.draggedNode.x);
+
+                this.render();
+            },
+
+            handleMouseUp() {
+                if (this.draggedNode) {
+                    const elements = document.querySelectorAll('.canvas-node');
+                    elements.forEach(el => el.classList.remove('dragging'));
+                    this.draggedNode = null;
+                    this.saveToLocalStorage();
+                }
+            },
+
+            startConnection(node) {
+                if (!this.connectionMode) {
+                    this.connectionMode = true;
+                    this.connectionSource = node;
+                    document.getElementById('connectionModeIndicator').classList.add('active');
+                } else {
+                    if (this.connectionSource.id !== node.id) {
+                        // Check if connection already exists
+                        const exists = this.connections.some(c =>
+                            (c.from === this.connectionSource.id && c.to === node.id) ||
+                            (c.from === node.id && c.to === this.connectionSource.id)
+                        );
+
+                        if (!exists) {
+                            this.connections.push({
+                                from: this.connectionSource.id,
+                                to: node.id
+                            });
+                        }
+                    }
+                    this.connectionMode = false;
+                    this.connectionSource = null;
+                    document.getElementById('connectionModeIndicator').classList.remove('active');
+                    this.render();
+                    this.saveToLocalStorage();
+                }
+            },
+
+            deleteNode(nodeId) {
+                this.nodes = this.nodes.filter(n => n.id !== nodeId);
+                this.connections = this.connections.filter(c =>
+                    c.from !== nodeId && c.to !== nodeId
+                );
+                this.render();
+                this.saveToLocalStorage();
+            },
+
+            // AI Coach Methods
+            toggleCoach() {
+                const panel = document.getElementById('aiCoachPanel');
+                const headerBtn = document.getElementById('coachHeaderBtn');
+
+                this.coachCollapsed = !this.coachCollapsed;
+
+                if (this.coachCollapsed) {
+                    panel.classList.add('collapsed');
+                    headerBtn.classList.remove('active');
+                } else {
+                    panel.classList.remove('collapsed');
+                    headerBtn.classList.add('active');
+                }
+            },
+
+            sendQuickPrompt(prompt) {
+                document.getElementById('coachInput').value = prompt;
+                this.sendCoachMessage();
+            },
+
+            async sendCoachMessage() {
+                const input = document.getElementById('coachInput');
+                const message = input.value.trim();
+
+                if (!message) return;
+
+                // Add user message
+                this.coachMessages.push({
+                    role: 'user',
+                    content: message
+                });
+
+                input.value = '';
+                this.renderCoachMessages();
+                this.showCoachLoading();
+
+                // Prepare context about the current map
+                const mapContext = this.getMapContext();
+
+                try {
+                    const response = await fetch('https://api.anthropic.com/v1/messages', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            model: 'claude-sonnet-4-20250514',
+                            max_tokens: 1000,
+                            messages: [
+                                {
+                                    role: 'user',
+                                    content: `You are an expert Wardley Mapping strategy coach. You help users understand their strategic landscape and make better decisions.
+
+Current map context:
+${mapContext}
+
+User question: ${message}
+
+Provide helpful, actionable strategic advice. Be conversational but insightful. If analyzing the map, focus on:
+- Strategic opportunities (where to innovate, where to optimize)
+- Evolution gaps (components that should be evolving but aren't)
+- Inertia risks (custom-built things that should be products/commodity)
+- Value chain insights (dependencies and positioning)
+
+Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
+                                }
+                            ]
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    // Extract text from response
+                    let assistantMessage = '';
+                    if (data.content && Array.isArray(data.content)) {
+                        assistantMessage = data.content
+                            .filter(block => block.type === 'text')
+                            .map(block => block.text)
+                            .join('\n\n');
+                    }
+
+                    if (assistantMessage) {
+                        this.coachMessages.push({
+                            role: 'assistant',
+                            content: assistantMessage
+                        });
+                    } else {
+                        throw new Error('No response from AI');
+                    }
+
+                } catch (error) {
+                    console.error('AI Coach error:', error);
+                    this.coachMessages.push({
+                        role: 'assistant',
+                        content: 'Sorry, I encountered an error connecting to the AI service. Please try again.'
+                    });
+                }
+
+                this.hideCoachLoading();
+                this.renderCoachMessages();
+                this.saveCoachMessages();
+            },
+
+            getMapContext() {
+                if (this.nodes.length === 0) {
+                    return 'The map is currently empty.';
+                }
+
+                const stageCount = {
+                    genesis: 0,
+                    custom: 0,
+                    product: 0,
+                    commodity: 0
+                };
+
+                this.nodes.forEach(node => {
+                    stageCount[node.stage]++;
+                });
+
+                const evolvingNodes = this.nodes.filter(n => n.evolving);
+                const notedNodes = this.nodes.filter(n => n.note);
+
+                let context = `Components (${this.nodes.length} total):\n`;
+                this.nodes.forEach(node => {
+                    context += `- ${node.label} [${node.stage}${node.evolving ? ' → ' + node.evolvingTo : ''}]`;
+                    if (node.note) {
+                        context += ` - Note: ${node.note.substring(0, 100)}${node.note.length > 100 ? '...' : ''}`;
+                    }
+                    context += '\n';
+                });
+
+                context += `\nStage distribution:\n`;
+                context += `- Genesis: ${stageCount.genesis}\n`;
+                context += `- Custom-Built: ${stageCount.custom}\n`;
+                context += `- Product: ${stageCount.product}\n`;
+                context += `- Commodity: ${stageCount.commodity}\n`;
+
+                context += `\nDependencies: ${this.connections.length}\n`;
+                context += `Evolving components: ${evolvingNodes.length}\n`;
+                context += `Components with notes: ${notedNodes.length}\n`;
+
+                return context;
+            },
+
+            showCoachLoading() {
+                const messagesDiv = document.getElementById('coachMessages');
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'coachLoading';
+                loadingDiv.className = 'coach-loading';
+                loadingDiv.innerHTML = `
+                    <div class="loading-spinner"></div>
+                    <span>Thinking...</span>
+                `;
+                messagesDiv.appendChild(loadingDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            },
+
+            hideCoachLoading() {
+                const loadingDiv = document.getElementById('coachLoading');
+                if (loadingDiv) {
+                    loadingDiv.remove();
+                }
+            },
+
+            renderCoachMessages() {
+                const messagesDiv = document.getElementById('coachMessages');
+
+                // Keep welcome message, clear others
+                const welcomeMessage = messagesDiv.querySelector('.coach-message.assistant');
+                messagesDiv.innerHTML = '';
+
+                // Only show welcome if no other messages
+                if (this.coachMessages.length === 0) {
+                    messagesDiv.appendChild(welcomeMessage);
+                    return;
+                }
+
+                this.coachMessages.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `coach-message ${msg.role}`;
+
+                    const roleLabel = msg.role === 'user' ? 'You' : 'AI Coach';
+                    const content = this.formatMessageContent(msg.content);
+
+                    messageDiv.innerHTML = `
+                        <div class="message-role">${roleLabel}</div>
+                        <div class="message-content">${content}</div>
+                    `;
+
+                    messagesDiv.appendChild(messageDiv);
+                });
+
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            },
+
+            formatMessageContent(content) {
+                // Basic markdown-style formatting
+                content = content
+                    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n- /g, '<li>')
+                    .replace(/\n/g, '<br>');
+
+                // Wrap in paragraphs
+                if (!content.startsWith('<p>')) {
+                    content = '<p>' + content + '</p>';
+                }
+
+                // Handle lists
+                content = content.replace(/(<li>.*?)(<\/p>|<p>)/g, '</li>$2');
+                content = content.replace(/(<p>)?(<li>)/g, '<ul><li>');
+                content = content.replace(/(<\/li>)(<\/p>|<p>)/g, '</li></ul>$2');
+
+                return content;
+            },
+
+            saveCoachMessages() {
+                localStorage.setItem('wardleyCoachMessages', JSON.stringify(this.coachMessages));
+            },
+
+            loadCoachMessages() {
+                const saved = localStorage.getItem('wardleyCoachMessages');
+                if (saved) {
+                    try {
+                        this.coachMessages = JSON.parse(saved);
+                        this.renderCoachMessages();
+                    } catch (e) {
+                        console.error('Failed to load coach messages');
+                    }
+                }
+            },
+
+            clearCoachHistory() {
+                if (confirm('Clear all coach conversation history?')) {
+                    this.coachMessages = [];
+                    this.renderCoachMessages();
+                    this.saveCoachMessages();
+                }
+            },
+
+            // Component Notes Methods
+            currentNoteNodeId: null,
+
+            showNoteModal(nodeId) {
+                const node = this.nodes.find(n => n.id === nodeId);
+                if (!node) return;
+
+                this.currentNoteNodeId = nodeId;
+                document.getElementById('noteModalSubtitle').textContent = `Notes for: ${node.label}`;
+                document.getElementById('noteTextarea').value = node.note || '';
+                document.getElementById('noteModal').classList.add('active');
+
+                // Focus textarea
+                setTimeout(() => {
+                    document.getElementById('noteTextarea').focus();
+                }, 100);
+            },
+
+            saveNote() {
+                if (this.currentNoteNodeId === null) return;
+
+                const node = this.nodes.find(n => n.id === this.currentNoteNodeId);
+                if (!node) return;
+
+                const noteText = document.getElementById('noteTextarea').value.trim();
+
+                if (noteText) {
+                    node.note = noteText;
+                } else {
+                    delete node.note;
+                }
+
+                this.closeModal('noteModal');
+                this.render();
+                this.saveToLocalStorage();
+                this.currentNoteNodeId = null;
+            },
+
+            deleteNote() {
+                if (this.currentNoteNodeId === null) return;
+
+                const node = this.nodes.find(n => n.id === this.currentNoteNodeId);
+                if (!node) return;
+
+                if (node.note && !confirm('Delete this note?')) return;
+
+                delete node.note;
+                this.closeModal('noteModal');
+                this.render();
+                this.saveToLocalStorage();
+                this.currentNoteNodeId = null;
+            },
+
+            render() {
+                this.renderNodes();
+                this.renderConnections();
+                this.renderComponentList();
+            },
+
+            renderNodes() {
+                const canvas = document.getElementById('canvas');
+                const existingNodes = canvas.querySelectorAll('.canvas-node');
+                existingNodes.forEach(node => node.remove());
+
+                this.nodes.forEach(node => {
+                    const nodeEl = document.createElement('div');
+                    nodeEl.className = 'canvas-node';
+                    nodeEl.style.left = node.x + 'px';
+                    nodeEl.style.top = node.y + 'px';
+                    nodeEl.style.borderColor = this.getStageColor(node.stage);
+
+                    // Add note badge if node has notes
+                    const noteBadge = node.note ? `<div class="node-note-badge" onclick="event.stopPropagation(); app.showNoteModal(${node.id})" title="View/Edit Note">💭</div>` : '';
+
+                    nodeEl.innerHTML = `
+                        ${noteBadge}
+                        <div class="node-label">${node.label}</div>
+                        <div class="node-stage">${node.stage}${node.evolving ? ' → ' + node.evolvingTo : ''}</div>
+                        <div class="node-actions">
+                            <button class="node-action-btn" onclick="app.showNoteModal(${node.id})">
+                                ${node.note ? '✏️ Edit Note' : '📝 Add Note'}
+                            </button>
+                            <button class="node-action-btn" onclick="app.toggleEvolution(${node.id})">
+                                ${node.evolving ? '✓ Evolving' : 'Evolve'}
+                            </button>
+                            <button class="node-action-btn" onclick="app.startConnection(app.nodes.find(n => n.id === ${node.id}))">
+                                Connect
+                            </button>
+                            <button class="node-action-btn" onclick="app.deleteNode(${node.id})">
+                                Delete
+                            </button>
+                        </div>
+                    `;
+
+                    nodeEl.addEventListener('mousedown', (e) => this.handleNodeMouseDown(node, e));
+                    canvas.appendChild(nodeEl);
+                });
+            },
+
+            renderConnections() {
+                const svg = document.getElementById('connections');
+                const canvas = document.getElementById('canvas');
+                const canvasWidth = canvas.offsetWidth;
+
+                svg.innerHTML = `
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" class="connection-marker" />
+                        </marker>
+                        <marker id="evolution-arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto">
+                            <polygon points="0 0, 12 4, 0 8" class="evolution-marker" />
+                        </marker>
+                    </defs>
+                `;
+
+                // Draw dependency connections
+                this.connections.forEach(conn => {
+                    const fromNode = this.nodes.find(n => n.id === conn.from);
+                    const toNode = this.nodes.find(n => n.id === conn.to);
+
+                    if (fromNode && toNode) {
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+                        const x1 = fromNode.x + 60;
+                        const y1 = fromNode.y + 35;
+                        const x2 = toNode.x + 60;
+                        const y2 = toNode.y + 35;
+
+                        const midX = (x1 + x2) / 2;
+                        const midY = (y1 + y2) / 2;
+                        const offset = 30;
+
+                        const d = `M ${x1} ${y1} Q ${midX} ${midY - offset} ${x2} ${y2}`;
+
+                        line.setAttribute('d', d);
+                        line.setAttribute('class', 'connection-line');
+                        line.setAttribute('marker-end', 'url(#arrowhead)');
+
+                        svg.appendChild(line);
+                    }
+                });
+
+                // Draw evolution arrows - use percentage-based target positions
+                this.nodes.forEach(node => {
+                    if (node.evolving && node.evolvingTo) {
+                        const startX = node.x + 60;
+                        const startY = node.y + 35;
+
+                        // Calculate target position based on percentage of canvas width
+                        const targetPercent = this.getStagePercentage(node.evolvingTo);
+                        const endX = (canvasWidth * targetPercent) / 100;
+                        const endY = startY;
+
+                        // Create arrow path
+                        const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        arrow.setAttribute('x1', startX);
+                        arrow.setAttribute('y1', startY);
+                        arrow.setAttribute('x2', endX);
+                        arrow.setAttribute('y2', endY);
+                        arrow.setAttribute('class', 'evolution-arrow');
+                        arrow.setAttribute('marker-end', 'url(#evolution-arrowhead)');
+
+                        svg.appendChild(arrow);
+
+                        // Add label
+                        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        const labelX = (startX + endX) / 2;
+                        const labelY = startY - 10;
+                        label.setAttribute('x', labelX);
+                        label.setAttribute('y', labelY);
+                        label.setAttribute('text-anchor', 'middle');
+                        label.setAttribute('class', 'evolution-label');
+                        label.textContent = 'evolving';
+
+                        svg.appendChild(label);
+                    }
+                });
+            },
+
+            renderComponentList() {
+                const list = document.getElementById('componentList');
+                list.innerHTML = '';
+
+                if (this.nodes.length === 0) {
+                    list.innerHTML = '<div style="color: var(--text-muted); font-size: 0.875rem;">No components yet</div>';
+                    return;
+                }
+
+                this.nodes.forEach(node => {
+                    const item = document.createElement('div');
+                    item.className = 'component-item';
+                    item.style.borderLeftColor = this.getStageColor(node.stage);
+                    item.style.borderLeftWidth = '3px';
+                    item.textContent = node.label;
+                    list.appendChild(item);
+                });
+            },
+
+            clearCanvas() {
+                if (confirm('Are you sure you want to clear the entire map?')) {
+                    this.nodes = [];
+                    this.connections = [];
+                    this.nodeIdCounter = 0;
+                    this.render();
+                    this.saveToLocalStorage();
+                }
+            },
+
+            showExportModal() {
+                const data = {
+                    nodes: this.nodes,
+                    connections: this.connections
+                };
+                document.getElementById('exportData').value = JSON.stringify(data, null, 2);
+                document.getElementById('exportModal').classList.add('active');
+            },
+
+            showImportModal() {
+                document.getElementById('importModal').classList.add('active');
+            },
+
+            closeModal(modalId) {
+                document.getElementById(modalId).classList.remove('active');
+            },
+
+            copyExportData() {
+                const textarea = document.getElementById('exportData');
+                textarea.select();
+                document.execCommand('copy');
+                alert('Copied to clipboard!');
+            },
+
+            downloadExport() {
+                const data = document.getElementById('exportData').value;
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'wardley-map-' + Date.now() + '.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            },
+
+            importData() {
+                try {
+                    const data = JSON.parse(document.getElementById('importData').value);
+                    this.nodes = data.nodes || [];
+                    this.connections = data.connections || [];
+                    this.nodeIdCounter = Math.max(...this.nodes.map(n => n.id), 0) + 1;
+                    this.render();
+                    this.saveToLocalStorage();
+                    this.closeModal('importModal');
+                    document.getElementById('importData').value = '';
+                } catch (e) {
+                    alert('Invalid JSON data. Please check your input.');
+                }
+            },
+
+            saveToLocalStorage() {
+                const data = {
+                    nodes: this.nodes,
+                    connections: this.connections,
+                    nodeIdCounter: this.nodeIdCounter
+                };
+                localStorage.setItem('wardleyMapData', JSON.stringify(data));
+            },
+
+            loadFromLocalStorage() {
+                const data = localStorage.getItem('wardleyMapData');
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        this.nodes = parsed.nodes || [];
+                        this.connections = parsed.connections || [];
+                        this.nodeIdCounter = parsed.nodeIdCounter || 0;
+                    } catch (e) {
+                        console.error('Failed to load data from localStorage');
+                    }
+                }
+            }
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
