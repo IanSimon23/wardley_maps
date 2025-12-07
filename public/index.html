@@ -109,11 +109,35 @@
 
         /* Sidebar */
         .sidebar {
-            width: 300px;
+            width: 250px;
             background: var(--bg-secondary);
             border-right: 1px solid var(--border);
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-section {
             padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-title {
+            font-family: 'Fraunces', serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .component-list {
+            flex: 1;
+            overflow-y: auto;
         }
 
         /* AI Coach Panel */
@@ -1140,6 +1164,8 @@
         <div class="header">
             <div class="logo">Wardley Mapper</div>
             <div class="header-actions">
+                <button onclick="app.showAddComponentModal()">➕ Add Component</button>
+                <button onclick="app.showHelpModal()">❓ Help</button>
                 <button onclick="app.clearCanvas()">Clear</button>
                 <button onclick="app.showExportModal()">Export</button>
                 <button onclick="app.showImportModal()">Import</button>
@@ -1155,45 +1181,11 @@
             <!-- Sidebar -->
             <div class="sidebar">
                 <div class="sidebar-section">
-                    <div class="sidebar-title">Add Component</div>
-                    <div class="add-component-form">
-                        <input type="text" id="componentName" placeholder="Component name..." />
-                        <button class="primary" onclick="app.addComponentToCanvas()">Add to Canvas</button>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-title">Components</div>
+                    <div class="sidebar-title">Components (<span id="componentCount">0</span>)</div>
                     <div class="component-list" id="componentList">
                         <!-- Components will be listed here -->
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-title">Instructions</div>
-                    <div class="info-text">
-                        <p style="margin-bottom: 0.75rem;">Drag components onto the canvas and position them based on their evolutionary stage.</p>
-                        <div class="keyboard-shortcuts">
-                            <div class="shortcut">
-                                <span>Click node</span>
-                                <span class="shortcut-key">Select</span>
-                            </div>
-                            <div class="shortcut">
-                                <span>Drag node</span>
-                                <span class="shortcut-key">Move</span>
-                            </div>
-                            <div class="shortcut">
-                                <span>Evolve button</span>
-                                <span class="shortcut-key">Show evolution</span>
-                            </div>
-                            <div class="shortcut">
-                                <span>Connect button</span>
-                                <span class="shortcut-key">Link nodes</span>
-                            </div>
-                            <div class="shortcut">
-                                <span>Delete button</span>
-                                <span class="shortcut-key">Remove</span>
-                            </div>
+                        <div class="info-text" style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 2rem 0;">
+                            Click "➕ Add Component" above to get started
                         </div>
                     </div>
                 </div>
@@ -1378,6 +1370,82 @@
         </div>
     </div>
 
+    <!-- Add Component Modal -->
+    <div class="modal-overlay" id="addComponentModal">
+        <div class="modal">
+            <div class="modal-title">Add Component</div>
+            <div class="modal-content">
+                <input type="text" id="newComponentName" placeholder="Component name..." onkeypress="if(event.key==='Enter') app.addComponentFromModal()" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 0.875rem; margin-bottom: 1rem;" />
+                <select id="newComponentStage" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 0.875rem;">
+                    <option value="genesis">Genesis</option>
+                    <option value="custom" selected>Custom-Built</option>
+                    <option value="product">Product</option>
+                    <option value="commodity">Commodity</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="primary" onclick="app.addComponentFromModal()">Add Component</button>
+                <button onclick="app.closeModal('addComponentModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal">
+            <div class="modal-title">How to Use Wardley Mapper</div>
+            <div class="modal-content" style="max-height: 500px; overflow-y: auto;">
+                <div style="line-height: 1.6;">
+                    <h3 style="color: var(--accent-primary); margin-top: 0; margin-bottom: 0.75rem;">🗺️ Getting Started</h3>
+                    <p style="margin-bottom: 1.5rem;">Click <strong>➕ Add Component</strong> to add items to your map. Drag components to position them along the evolution axis (Genesis → Commodity) and value chain (Invisible → Visible to user).</p>
+
+                    <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">⌨️ Controls</h3>
+                    <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem;">
+                        <li><strong>Drag component</strong> - Move and auto-assign evolution stage</li>
+                        <li><strong>Space + Drag</strong> - Pan the canvas</li>
+                        <li><strong>Scroll wheel</strong> - Zoom in/out</li>
+                        <li><strong>Click component in list</strong> - Zoom to that component</li>
+                        <li><strong>Hover over component</strong> - See action buttons</li>
+                        <li><strong>Double-click zone</strong> - Add/edit notes</li>
+                    </ul>
+
+                    <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">🎯 Component Actions</h3>
+                    <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem;">
+                        <li><strong>Evolve</strong> - Show evolution arrow to next stage</li>
+                        <li><strong>Drag arrow</strong> - Adjust evolution target</li>
+                        <li><strong>Connect</strong> - Create dependency between components</li>
+                        <li><strong>Add Note</strong> - Document assumptions, risks, strategy</li>
+                        <li><strong>Delete</strong> - Remove component</li>
+                    </ul>
+
+                    <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">📍 Strategic Zones</h3>
+                    <p style="margin-bottom: 0.5rem;">Mark strategic areas on your map:</p>
+                    <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem;">
+                        <li><strong>💡 Opportunity</strong> - Areas to innovate or attack</li>
+                        <li><strong>⚠️ Inertia</strong> - Resistance to change</li>
+                        <li><strong>🚨 Threat</strong> - Competitive threats</li>
+                        <li><strong>⚔️ War</strong> - Active competition zones</li>
+                        <li><strong>📝 Note</strong> - General observations</li>
+                    </ul>
+                    <p style="margin-bottom: 1.5rem;"><em>Hover over zones to see resize handles at corners. Drag to move, drag corners to resize.</em></p>
+
+                    <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">🤖 AI Strategy Coach</h3>
+                    <p style="margin-bottom: 1.5rem;">Click <strong>🤖 AI Coach</strong> to get strategic insights about your map. The AI understands your entire map context including components, evolution, connections, notes, and zones.</p>
+
+                    <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">💾 Saving & Sharing</h3>
+                    <ul style="margin-bottom: 0; padding-left: 1.5rem;">
+                        <li><strong>Save</strong> - Auto-saves to browser (persists across sessions)</li>
+                        <li><strong>Export</strong> - Download JSON file</li>
+                        <li><strong>Import</strong> - Load JSON file</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button onclick="app.closeModal('helpModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const app = {
             nodes: [],
@@ -1445,11 +1513,6 @@
                             canvas.style.cursor = 'default';
                         }
                     }
-                });
-
-                // Enter key on component input
-                document.getElementById('componentName').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.addComponentToCanvas();
                 });
 
                 // Enter key on coach input
@@ -1557,26 +1620,6 @@
                 this.applyTransform();
             },
 
-            addComponentToCanvas() {
-                const input = document.getElementById('componentName');
-                const label = input.value.trim();
-
-                if (!label) return;
-
-                const node = {
-                    id: this.nodeIdCounter++,
-                    label: label,
-                    x: 300,
-                    y: 200,
-                    stage: 'custom'
-                };
-
-                this.nodes.push(node);
-                input.value = '';
-                this.render();
-                this.saveToLocalStorage();
-            },
-
             getStageColor(stage) {
                 const colors = {
                     genesis: 'var(--genesis)',
@@ -1677,8 +1720,14 @@
             handleMouseMove(e) {
                 // Handle panning first
                 if (this.isPanning) {
-                    this.panX = e.clientX - this.panStartX;
-                    this.panY = e.clientY - this.panStartY;
+                    const newPanX = e.clientX - this.panStartX;
+                    const newPanY = e.clientY - this.panStartY;
+
+                    // Limit panning - don't go past left edge (Genesis boundary)
+                    // Allow panning right (positive), but limit left (negative)
+                    this.panX = Math.min(0, newPanX);
+                    this.panY = newPanY;
+
                     this.applyTransform();
                     return;
                 }
@@ -1754,6 +1803,7 @@
                     const x = mouseX - this.dragOffset.x;
                     const y = mouseY - this.dragOffset.y;
 
+                    // Prevent going past left edge (Genesis boundary)
                     this.draggedNode.x = Math.max(0, x);
                     this.draggedNode.y = Math.max(0, y);
 
@@ -1769,6 +1819,7 @@
                     const x = mouseX - this.dragOffset.x;
                     const y = mouseY - this.dragOffset.y;
 
+                    // Prevent going past left edge
                     this.draggedZone.x = Math.max(0, x);
                     this.draggedZone.y = Math.max(0, y);
 
@@ -2428,10 +2479,12 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
 
             renderComponentList() {
                 const list = document.getElementById('componentList');
+                const countEl = document.getElementById('componentCount');
                 list.innerHTML = '';
+                countEl.textContent = this.nodes.length;
 
                 if (this.nodes.length === 0) {
-                    list.innerHTML = '<div style="color: var(--text-muted); font-size: 0.875rem;">No components yet</div>';
+                    list.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 2rem 0;">Click "➕ Add Component" above to get started</div>';
                     return;
                 }
 
@@ -2440,9 +2493,59 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                     item.className = 'component-item';
                     item.style.borderLeftColor = this.getStageColor(node.stage);
                     item.style.borderLeftWidth = '3px';
-                    item.textContent = node.label;
+
+                    const label = document.createElement('span');
+                    label.textContent = node.label;
+                    item.appendChild(label);
+
+                    const badge = document.createElement('span');
+                    badge.className = 'stage-badge';
+                    badge.textContent = node.stage;
+                    badge.style.background = this.getStageColor(node.stage) + '33';
+                    badge.style.color = this.getStageColor(node.stage);
+                    item.appendChild(badge);
+
+                    // Click to zoom to component
+                    item.addEventListener('click', () => this.zoomToComponent(node.id));
+                    item.title = 'Click to zoom to this component';
+
                     list.appendChild(item);
                 });
+            },
+
+            zoomToComponent(nodeId) {
+                const node = this.nodes.find(n => n.id === nodeId);
+                if (!node) return;
+
+                // Center the view on this component
+                const canvasContent = document.getElementById('canvasContent');
+                const canvas = document.getElementById('canvas');
+                const canvasRect = canvas.getBoundingClientRect();
+
+                // Calculate position to center the node in viewport
+                const targetX = -node.x * this.zoomLevel + (canvasRect.width / 2);
+                const targetY = -node.y * this.zoomLevel + (canvasRect.height / 2);
+
+                this.panX = targetX;
+                this.panY = targetY;
+                this.panStartX = 0;
+                this.panStartY = 0;
+
+                this.applyTransform();
+
+                // Flash the node briefly
+                setTimeout(() => {
+                    const nodeElements = document.querySelectorAll('.canvas-node');
+                    nodeElements.forEach(el => {
+                        const rect = el.getBoundingClientRect();
+                        if (Math.abs(rect.left - canvasRect.width/2) < 100) {
+                            el.style.boxShadow = '0 0 20px var(--accent-primary)';
+                            setTimeout(() => {
+                                el.style.boxShadow = '';
+                            }, 1000);
+                        }
+                    });
+                }, 100);
             },
 
             clearCanvas() {
@@ -2469,6 +2572,50 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
 
             showImportModal() {
                 document.getElementById('importModal').classList.add('active');
+            },
+
+            showAddComponentModal() {
+                document.getElementById('newComponentName').value = '';
+                document.getElementById('newComponentStage').value = 'custom';
+                document.getElementById('addComponentModal').classList.add('active');
+                setTimeout(() => {
+                    document.getElementById('newComponentName').focus();
+                }, 100);
+            },
+
+            showHelpModal() {
+                document.getElementById('helpModal').classList.add('active');
+            },
+
+            addComponentFromModal() {
+                const name = document.getElementById('newComponentName').value.trim();
+                const stage = document.getElementById('newComponentStage').value;
+
+                if (!name) {
+                    alert('Please enter a component name');
+                    return;
+                }
+
+                const canvasContent = document.getElementById('canvasContent');
+                const stagePosition = this.getStagePosition(stage);
+
+                const newNode = {
+                    id: this.nodeIdCounter++,
+                    label: name,
+                    x: stagePosition,
+                    y: 200 + (this.nodes.length * 40),
+                    stage: stage
+                };
+
+                this.nodes.push(newNode);
+                this.render();
+                this.saveToLocalStorage();
+                this.closeModal('addComponentModal');
+
+                // Zoom to new component
+                setTimeout(() => {
+                    this.zoomToComponent(newNode.id);
+                }, 100);
             },
 
             closeModal(modalId) {
