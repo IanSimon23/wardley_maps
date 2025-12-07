@@ -17,3 +17,9 @@ Thumbs.db
 .idea/
 .vercel
 .env*.local
+
+# Tests
+tests/node_modules
+test_results/
+playwright-report/
+playwright/.cache/

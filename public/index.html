@@ -89,6 +89,18 @@
             transform: translateY(-1px);
         }
 
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button:disabled:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border);
+            transform: none;
+        }
+
         button.primary {
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border: none;
@@ -870,6 +882,16 @@
             z-index: 30;
         }
 
+        .canvas-node.highlighted {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px rgba(74, 158, 255, 0.6);
+            z-index: 25;
+        }
+
+        .canvas-node.dimmed {
+            opacity: 0.3;
+        }
+
         .node-label {
             font-size: 0.875rem;
             font-weight: 500;
@@ -953,10 +975,35 @@
             fill: none;
             opacity: 0.6;
             stroke-dasharray: 5, 5;
+            transition: all 0.2s ease;
+        }
+
+        .connection-line.highlighted {
+            stroke: var(--accent-primary);
+            stroke-width: 3;
+            opacity: 1;
+            filter: drop-shadow(0 0 6px var(--accent-primary));
+            stroke-dasharray: 0;
+        }
+
+        .connection-line.dimmed {
+            opacity: 0.15;
+            stroke: var(--text-muted);
         }
 
         .connection-marker {
             fill: var(--accent-primary);
+            transition: all 0.2s ease;
+        }
+
+        .connection-marker.highlighted {
+            fill: var(--accent-primary);
+            filter: drop-shadow(0 0 4px var(--accent-primary));
+        }
+
+        .connection-marker.dimmed {
+            opacity: 0.15;
+            fill: var(--text-muted);
         }
 
         /* Evolution Arrows */
@@ -1164,6 +1211,8 @@
         <div class="header">
             <div class="logo">Wardley Mapper</div>
             <div class="header-actions">
+                <button onclick="app.undo()" id="undoBtn" title="Undo (Ctrl+Z)" disabled>↶ Undo</button>
+                <button onclick="app.redo()" id="redoBtn" title="Redo (Ctrl+Y)" disabled>↷ Redo</button>
                 <button onclick="app.showAddComponentModal()">➕ Add Component</button>
                 <button onclick="app.showHelpModal()">❓ Help</button>
                 <button onclick="app.clearCanvas()">Clear</button>
@@ -1404,6 +1453,8 @@
                         <li><strong>Drag component</strong> - Move and auto-assign evolution stage</li>
                         <li><strong>Space + Drag</strong> - Pan the canvas</li>
                         <li><strong>Scroll wheel</strong> - Zoom in/out</li>
+                        <li><strong>Ctrl+Z</strong> - Undo last action</li>
+                        <li><strong>Ctrl+Y</strong> or <strong>Ctrl+Shift+Z</strong> - Redo</li>
                         <li><strong>Click component in list</strong> - Zoom to that component</li>
                         <li><strong>Hover over component</strong> - See action buttons</li>
                         <li><strong>Double-click zone</strong> - Add/edit notes</li>
@@ -1477,6 +1528,12 @@
             resizeStartWidth: 0,
             resizeStartHeight: 0,
 
+            // Undo/Redo state
+            history: [],
+            historyIndex: -1,
+            maxHistorySize: 50,
+            isUndoRedoAction: false,
+
             init() {
                 this.loadFromLocalStorage();
                 this.setupEventListeners();
@@ -1502,6 +1559,18 @@
                     if (e.code === 'Space' && !this.spacePressed) {
                         this.spacePressed = true;
                         canvas.style.cursor = 'grab';
+                    }
+
+                    // Undo: Ctrl+Z (or Cmd+Z on Mac)
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.undo();
+                    }
+
+                    // Redo: Ctrl+Y (or Ctrl+Shift+Z, or Cmd+Shift+Z on Mac)
+                    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
+                        e.preventDefault();
+                        this.redo();
                     }
                 });
 
@@ -1648,6 +1717,127 @@
                     return stages[currentIndex + 1];
                 }
                 return currentStage; // Already at commodity
+            },
+
+            highlightConnections(nodeId) {
+                // Find all connections involving this node
+                const relatedConnections = this.connections.filter(
+                    conn => conn.from === nodeId || conn.to === nodeId
+                );
+
+                const incomingCount = this.connections.filter(conn => conn.to === nodeId).length;
+                const outgoingCount = this.connections.filter(conn => conn.from === nodeId).length;
+
+                const relatedNodeIds = new Set();
+                relatedNodeIds.add(nodeId);
+
+                // Get all nodes connected to this node
+                relatedConnections.forEach(conn => {
+                    relatedNodeIds.add(conn.from);
+                    relatedNodeIds.add(conn.to);
+                });
+
+                // Show connection info
+                this.showConnectionInfo(nodeId, incomingCount, outgoingCount);
+
+                // Highlight/dim all connections
+                const allConnections = document.querySelectorAll('.connection-line');
+                allConnections.forEach(line => {
+                    const from = parseInt(line.getAttribute('data-from'));
+                    const to = parseInt(line.getAttribute('data-to'));
+
+                    if (from === nodeId || to === nodeId) {
+                        // This connection is directly related
+                        line.classList.add('highlighted');
+                        line.classList.remove('dimmed');
+                        line.setAttribute('marker-end', 'url(#arrowhead-highlighted)');
+                    } else {
+                        // Dim other connections
+                        line.classList.add('dimmed');
+                        line.classList.remove('highlighted');
+                        line.setAttribute('marker-end', 'url(#arrowhead-dimmed)');
+                    }
+                });
+
+                // Highlight/dim all nodes
+                const allNodes = document.querySelectorAll('.canvas-node');
+                this.nodes.forEach((node, index) => {
+                    const nodeEl = allNodes[index];
+                    if (relatedNodeIds.has(node.id)) {
+                        nodeEl.classList.add('highlighted');
+                        nodeEl.classList.remove('dimmed');
+                    } else {
+                        nodeEl.classList.add('dimmed');
+                        nodeEl.classList.remove('highlighted');
+                    }
+                });
+            },
+
+            showConnectionInfo(nodeId, incomingCount, outgoingCount) {
+                const node = this.nodes.find(n => n.id === nodeId);
+                if (!node) return;
+
+                // Count connected components
+                const relatedConnections = this.connections.filter(
+                    conn => conn.from === nodeId || conn.to === nodeId
+                );
+                const relatedNodeIds = new Set();
+                relatedNodeIds.add(nodeId);
+                relatedConnections.forEach(conn => {
+                    relatedNodeIds.add(conn.from);
+                    relatedNodeIds.add(conn.to);
+                });
+
+                // Remove existing info if any
+                const existing = document.getElementById('connectionInfo');
+                if (existing) existing.remove();
+
+                // Create info element
+                const info = document.createElement('div');
+                info.id = 'connectionInfo';
+                info.style.cssText = `
+                    position: fixed;
+                    bottom: 80px;
+                    right: 20px;
+                    background: var(--bg-secondary);
+                    border: 2px solid var(--accent-primary);
+                    border-radius: 8px;
+                    padding: 1rem;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+                    z-index: 1000;
+                    min-width: 200px;
+                `;
+
+                info.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">${node.label}</div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                        <div style="margin-bottom: 0.25rem;">↓ ${incomingCount} incoming</div>
+                        <div>↑ ${outgoingCount} outgoing</div>
+                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--text-muted);">
+                            ${relatedNodeIds.size - 1} connected components
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(info);
+            },
+
+            clearConnectionHighlight() {
+                // Remove connection info
+                const info = document.getElementById('connectionInfo');
+                if (info) info.remove();
+
+                // Remove all highlighting classes
+                const allConnections = document.querySelectorAll('.connection-line');
+                allConnections.forEach(line => {
+                    line.classList.remove('highlighted', 'dimmed');
+                    line.setAttribute('marker-end', 'url(#arrowhead)');
+                });
+
+                const allNodes = document.querySelectorAll('.canvas-node');
+                allNodes.forEach(node => {
+                    node.classList.remove('highlighted', 'dimmed');
+                });
             },
 
             getStagePosition(stage) {
@@ -2385,6 +2575,11 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                     `;
 
                     nodeEl.addEventListener('mousedown', (e) => this.handleNodeMouseDown(node, e));
+
+                    // Add hover listeners for connection highlighting
+                    nodeEl.addEventListener('mouseenter', () => this.highlightConnections(node.id));
+                    nodeEl.addEventListener('mouseleave', () => this.clearConnectionHighlight());
+
                     canvasContent.appendChild(nodeEl);
                 });
             },
@@ -2398,6 +2593,12 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                     <defs>
                         <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
                             <polygon points="0 0, 10 3, 0 6" class="connection-marker" />
+                        </marker>
+                        <marker id="arrowhead-highlighted" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" class="connection-marker highlighted" />
+                        </marker>
+                        <marker id="arrowhead-dimmed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" class="connection-marker dimmed" />
                         </marker>
                         <marker id="evolution-arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto">
                             <polygon points="0 0, 12 4, 0 8" class="evolution-marker" />
@@ -2427,6 +2628,8 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                         line.setAttribute('d', d);
                         line.setAttribute('class', 'connection-line');
                         line.setAttribute('marker-end', 'url(#arrowhead)');
+                        line.setAttribute('data-from', conn.from);
+                        line.setAttribute('data-to', conn.to);
 
                         svg.appendChild(line);
                     }
@@ -2666,6 +2869,86 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                     zoneIdCounter: this.zoneIdCounter
                 };
                 localStorage.setItem('wardleyMapData', JSON.stringify(data));
+
+                // Save state to history for undo/redo (unless this is an undo/redo action)
+                if (!this.isUndoRedoAction) {
+                    this.saveState();
+                }
+            },
+
+            saveState() {
+                // Create a snapshot of current state
+                const state = {
+                    nodes: JSON.parse(JSON.stringify(this.nodes)),
+                    connections: JSON.parse(JSON.stringify(this.connections)),
+                    nodeIdCounter: this.nodeIdCounter,
+                    zones: JSON.parse(JSON.stringify(this.zones)),
+                    zoneIdCounter: this.zoneIdCounter
+                };
+
+                // Remove any states after current index (if we've undone and then made a new change)
+                this.history = this.history.slice(0, this.historyIndex + 1);
+
+                // Add new state
+                this.history.push(state);
+
+                // Limit history size
+                if (this.history.length > this.maxHistorySize) {
+                    this.history.shift();
+                } else {
+                    this.historyIndex++;
+                }
+
+                this.updateUndoRedoButtons();
+            },
+
+            undo() {
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    this.restoreState(this.history[this.historyIndex]);
+                    this.updateUndoRedoButtons();
+                }
+            },
+
+            redo() {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.historyIndex++;
+                    this.restoreState(this.history[this.historyIndex]);
+                    this.updateUndoRedoButtons();
+                }
+            },
+
+            updateUndoRedoButtons() {
+                const undoBtn = document.getElementById('undoBtn');
+                const redoBtn = document.getElementById('redoBtn');
+
+                if (undoBtn) {
+                    undoBtn.disabled = this.historyIndex <= 0;
+                }
+                if (redoBtn) {
+                    redoBtn.disabled = this.historyIndex >= this.history.length - 1;
+                }
+            },
+
+            restoreState(state) {
+                this.isUndoRedoAction = true;
+
+                this.nodes = JSON.parse(JSON.stringify(state.nodes));
+                this.connections = JSON.parse(JSON.stringify(state.connections));
+                this.nodeIdCounter = state.nodeIdCounter;
+                this.zones = JSON.parse(JSON.stringify(state.zones));
+                this.zoneIdCounter = state.zoneIdCounter;
+
+                this.render();
+                localStorage.setItem('wardleyMapData', JSON.stringify({
+                    nodes: this.nodes,
+                    connections: this.connections,
+                    nodeIdCounter: this.nodeIdCounter,
+                    zones: this.zones,
+                    zoneIdCounter: this.zoneIdCounter
+                }));
+
+                this.isUndoRedoAction = false;
             },
 
             loadFromLocalStorage() {
@@ -2682,6 +2965,9 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                         console.error('Failed to load data from localStorage');
                     }
                 }
+
+                // Save initial state to history
+                this.saveState();
             }
         };
 
