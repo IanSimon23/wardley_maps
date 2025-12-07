@@ -1009,47 +1009,55 @@
         /* Evolution Arrows */
         .evolution-arrow {
             stroke: var(--warning);
-            stroke-width: 2;
+            stroke-width: 1.5;
             fill: none;
-            opacity: 0.8;
+            opacity: 0.7;
             stroke-dasharray: 0;
-            filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.4));
+            filter: drop-shadow(0 1px 2px rgba(245, 158, 11, 0.3));
             cursor: ew-resize;
             transition: all 0.2s ease;
+            pointer-events: stroke;
         }
 
         .evolution-arrow:hover {
-            stroke-width: 3;
+            stroke-width: 2.5;
             opacity: 1;
-            filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.6));
+            filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.6));
         }
 
         .evolution-marker {
             fill: var(--warning);
+            filter: drop-shadow(0 1px 2px rgba(245, 158, 11, 0.3));
         }
 
         .evolution-label {
             fill: var(--warning);
             font-size: 0.7rem;
-            font-weight: 600;
+            font-weight: 500;
             font-family: 'DM Sans', sans-serif;
+            text-shadow: 0 0 4px rgba(10, 15, 28, 0.8);
+        }
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
         /* Connection Mode Indicator */
         .connection-mode-indicator {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--accent-primary);
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
             color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 500;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
             animation: pulse 2s infinite;
             display: none;
+            z-index: 1000;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
         .connection-mode-indicator.active {
@@ -1057,8 +1065,8 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.9; transform: translateX(-50%) scale(1.02); }
         }
 
         /* Info Panel */
@@ -1277,10 +1285,13 @@
                         <svg class="connections" id="connections">
                             <defs>
                                 <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                                    <polygon points="0 0, 10 3, 0 6" class="connection-marker" />
+                                    <polygon points="0 0, 10 3, 0 6" fill="#4a9eff" />
                                 </marker>
-                                <marker id="evolution-arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                                    <polygon points="0 0, 10 3, 0 6" class="evolution-marker" />
+                                <marker id="arrowhead-delete" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#ef4444" />
+                                </marker>
+                                <marker id="evolution-arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                                    <polygon points="0 0, 8 3, 0 6" fill="#f59e0b" />
                                 </marker>
                             </defs>
                         </svg>
@@ -1743,6 +1754,11 @@
                 // Highlight/dim all connections
                 const allConnections = document.querySelectorAll('.connection-line');
                 allConnections.forEach(line => {
+                    // Don't interfere with delete-hover state
+                    if (line.classList.contains('delete-hover')) {
+                        return;
+                    }
+
                     const from = parseInt(line.getAttribute('data-from'));
                     const to = parseInt(line.getAttribute('data-to'));
 
@@ -1881,8 +1897,25 @@
                     if (nextStage !== node.stage) {
                         node.evolving = true;
                         node.evolvingTo = nextStage;
-                        // Store target X position (default to center of next stage)
-                        node.evolutionTargetX = this.getStagePosition(nextStage);
+
+                        // Find actual node width from DOM
+                        const nodeElements = document.querySelectorAll('.canvas-node');
+                        let nodeWidth = 140; // Default fallback
+                        nodeElements.forEach(el => {
+                            const elLeft = parseInt(el.style.left);
+                            const elTop = parseInt(el.style.top);
+                            if (Math.abs(elLeft - node.x) < 1 && Math.abs(elTop - node.y) < 1) {
+                                nodeWidth = el.offsetWidth;
+                            }
+                        });
+
+                        // Calculate target position - ensure it's always to the right of the node
+                        const stageTargetX = this.getStagePosition(nextStage);
+                        const nodeRightEdge = node.x + nodeWidth; // Right edge based on actual width
+                        const minDistance = 150; // Minimum arrow length
+
+                        // Target should be at least minDistance pixels to the right of node edge
+                        node.evolutionTargetX = Math.max(stageTargetX, nodeRightEdge + minDistance);
                     }
                 }
 
@@ -1979,10 +2012,25 @@
 
                 // Handle evolution arrow dragging
                 if (this.draggingEvolution && this.evolutionDragNode) {
-                    this.evolutionDragNode.evolutionTargetX = mouseX;
+                    // Find actual node width
+                    const nodeElements = document.querySelectorAll('.canvas-node');
+                    let nodeWidth = 140;
+                    nodeElements.forEach(el => {
+                        const elLeft = parseInt(el.style.left);
+                        const elTop = parseInt(el.style.top);
+                        if (Math.abs(elLeft - this.evolutionDragNode.x) < 1 && Math.abs(elTop - this.evolutionDragNode.y) < 1) {
+                            nodeWidth = el.offsetWidth;
+                        }
+                    });
+
+                    const nodeRightEdge = this.evolutionDragNode.x + nodeWidth;
+                    const minDistance = 150;
+
+                    // Ensure target is always at least minDistance to the right of node
+                    this.evolutionDragNode.evolutionTargetX = Math.max(mouseX, nodeRightEdge + minDistance);
 
                     // Update the evolvingTo stage based on where the arrow points
-                    this.evolutionDragNode.evolvingTo = this.getStageFromPosition(mouseX);
+                    this.evolutionDragNode.evolvingTo = this.getStageFromPosition(this.evolutionDragNode.evolutionTargetX);
 
                     this.render();
                     return;
@@ -2057,7 +2105,21 @@
                 if (!this.connectionMode) {
                     this.connectionMode = true;
                     this.connectionSource = node;
-                    document.getElementById('connectionModeIndicator').classList.add('active');
+                    const indicator = document.getElementById('connectionModeIndicator');
+                    indicator.textContent = `Connecting from "${node.label}" → Click another component`;
+                    indicator.classList.add('active');
+
+                    // Highlight source node
+                    const nodeElements = document.querySelectorAll('.canvas-node');
+                    nodeElements.forEach(el => {
+                        const elLeft = parseInt(el.style.left);
+                        const elTop = parseInt(el.style.top);
+                        if (Math.abs(elLeft - node.x) < 1 && Math.abs(elTop - node.y) < 1) {
+                            el.style.borderColor = 'var(--success)';
+                            el.style.borderWidth = '3px';
+                            el.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.6)';
+                        }
+                    });
                 } else {
                     if (this.connectionSource.id !== node.id) {
                         // Check if connection already exists
@@ -2075,7 +2137,9 @@
                     }
                     this.connectionMode = false;
                     this.connectionSource = null;
-                    document.getElementById('connectionModeIndicator').classList.remove('active');
+                    const indicator = document.getElementById('connectionModeIndicator');
+                    indicator.classList.remove('active');
+                    indicator.textContent = 'Click another node to connect'; // Reset to default
                     this.render();
                     this.saveToLocalStorage();
                 }
@@ -2085,6 +2149,14 @@
                 this.nodes = this.nodes.filter(n => n.id !== nodeId);
                 this.connections = this.connections.filter(c =>
                     c.from !== nodeId && c.to !== nodeId
+                );
+                this.render();
+                this.saveToLocalStorage();
+            },
+
+            deleteConnection(fromId, toId) {
+                this.connections = this.connections.filter(c =>
+                    !(c.from === fromId && c.to === toId)
                 );
                 this.render();
                 this.saveToLocalStorage();
@@ -2592,16 +2664,19 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                 svg.innerHTML = `
                     <defs>
                         <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                            <polygon points="0 0, 10 3, 0 6" class="connection-marker" />
+                            <polygon points="0 0, 10 3, 0 6" fill="#4a9eff" />
                         </marker>
                         <marker id="arrowhead-highlighted" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                            <polygon points="0 0, 10 3, 0 6" class="connection-marker highlighted" />
+                            <polygon points="0 0, 10 3, 0 6" fill="#4a9eff" style="filter: drop-shadow(0 0 4px #4a9eff);" />
                         </marker>
                         <marker id="arrowhead-dimmed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                            <polygon points="0 0, 10 3, 0 6" class="connection-marker dimmed" />
+                            <polygon points="0 0, 10 3, 0 6" fill="#64748b" opacity="0.15" />
                         </marker>
-                        <marker id="evolution-arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto">
-                            <polygon points="0 0, 12 4, 0 8" class="evolution-marker" />
+                        <marker id="arrowhead-delete" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" fill="#ef4444" />
+                        </marker>
+                        <marker id="evolution-arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                            <polygon points="0 0, 8 3, 0 6" fill="#f59e0b" />
                         </marker>
                     </defs>
                 `;
@@ -2612,8 +2687,6 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                     const toNode = this.nodes.find(n => n.id === conn.to);
 
                     if (fromNode && toNode) {
-                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-
                         const x1 = fromNode.x + 60;
                         const y1 = fromNode.y + 35;
                         const x2 = toNode.x + 60;
@@ -2625,12 +2698,54 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
 
                         const d = `M ${x1} ${y1} Q ${midX} ${midY - offset} ${x2} ${y2}`;
 
+                        // Create invisible wider hit area for easier clicking
+                        const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        hitArea.setAttribute('d', d);
+                        hitArea.setAttribute('stroke', 'transparent');
+                        hitArea.setAttribute('stroke-width', '20');
+                        hitArea.setAttribute('fill', 'none');
+                        hitArea.style.cursor = 'pointer';
+                        hitArea.style.pointerEvents = 'stroke';
+
+                        // Create visible connection line
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                         line.setAttribute('d', d);
                         line.setAttribute('class', 'connection-line');
                         line.setAttribute('marker-end', 'url(#arrowhead)');
                         line.setAttribute('data-from', conn.from);
                         line.setAttribute('data-to', conn.to);
+                        line.style.pointerEvents = 'none'; // Let hit area handle interactions
 
+                        // Add handlers to hit area
+                        hitArea.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm(`Delete connection from "${fromNode.label}" to "${toNode.label}"?`)) {
+                                this.deleteConnection(conn.from, conn.to);
+                            }
+                        });
+
+                        // Add hover effect - red to indicate delete
+                        hitArea.addEventListener('mouseenter', (e) => {
+                            e.stopPropagation();
+                            line.classList.add('delete-hover');
+                            line.style.strokeWidth = '4';
+                            line.style.opacity = '1';
+                            line.style.stroke = '#ef4444'; // Red color directly
+                            line.style.strokeDasharray = '0'; // Make solid
+                            line.setAttribute('marker-end', 'url(#arrowhead-delete)');
+                        });
+
+                        hitArea.addEventListener('mouseleave', (e) => {
+                            e.stopPropagation();
+                            line.classList.remove('delete-hover');
+                            line.style.strokeWidth = '';
+                            line.style.opacity = '';
+                            line.style.stroke = '';
+                            line.style.strokeDasharray = '';
+                            line.setAttribute('marker-end', 'url(#arrowhead)');
+                        });
+
+                        svg.appendChild(hitArea);
                         svg.appendChild(line);
                     }
                 });
@@ -2638,12 +2753,49 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                 // Draw evolution arrows - use stored target position
                 this.nodes.forEach(node => {
                     if (node.evolving && node.evolvingTo && node.evolutionTargetX !== undefined) {
-                        const startX = node.x + 60;
-                        const startY = node.y + 35;
-                        const endX = node.evolutionTargetX;
+                        // Find the actual DOM element to get real width
+                        const nodeElements = document.querySelectorAll('.canvas-node');
+                        let nodeWidth = 140; // Default fallback
+
+                        // Find the matching node element by checking position
+                        nodeElements.forEach(el => {
+                            const elLeft = parseInt(el.style.left);
+                            const elTop = parseInt(el.style.top);
+                            if (Math.abs(elLeft - node.x) < 1 && Math.abs(elTop - node.y) < 1) {
+                                nodeWidth = el.offsetWidth;
+                            }
+                        });
+
+                        // Always start from right edge of node
+                        const startX = node.x + nodeWidth; // Right edge based on actual width
+                        const startY = node.y + 35;  // Center vertically (approximate, works for most nodes)
+
+                        // Ensure target is always to the right of start
+                        const minDistance = 150;
+                        let endX = node.evolutionTargetX;
+
+                        // If target is too close or to the left, push it to the right
+                        if (endX < startX + minDistance) {
+                            endX = startX + minDistance;
+                            // Update the stored value for next time
+                            node.evolutionTargetX = endX;
+                        }
+
                         const endY = startY;
 
-                        // Create arrow path
+                        // Create invisible wider stroke for easier clicking/dragging
+                        const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        hitArea.setAttribute('x1', startX);
+                        hitArea.setAttribute('y1', startY);
+                        hitArea.setAttribute('x2', endX);
+                        hitArea.setAttribute('y2', endY);
+                        hitArea.setAttribute('stroke', 'transparent');
+                        hitArea.setAttribute('stroke-width', '20');
+                        hitArea.setAttribute('data-node-id', node.id);
+                        hitArea.style.cursor = 'ew-resize';
+                        hitArea.style.pointerEvents = 'stroke';
+
+                        // Create visible arrow (thin)
                         const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                         arrow.setAttribute('x1', startX);
                         arrow.setAttribute('y1', startY);
@@ -2652,28 +2804,31 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                         arrow.setAttribute('class', 'evolution-arrow');
                         arrow.setAttribute('marker-end', 'url(#evolution-arrowhead)');
                         arrow.setAttribute('data-node-id', node.id);
-                        arrow.style.cursor = 'ew-resize';
-                        arrow.style.pointerEvents = 'stroke';
-                        arrow.style.strokeWidth = '10'; // Wider hit area
+                        arrow.style.pointerEvents = 'none'; // Let hit area handle interactions
 
-                        // Make arrow draggable to adjust length
-                        arrow.addEventListener('mousedown', (e) => {
+                        // Make hit area draggable
+                        hitArea.addEventListener('mousedown', (e) => {
                             e.stopPropagation();
                             this.startEvolutionDrag(node, e);
                         });
 
+                        svg.appendChild(hitArea);
                         svg.appendChild(arrow);
 
-                        // Add label
+                        // Add label above arrow
                         const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                         const labelX = (startX + endX) / 2;
-                        const labelY = startY - 10;
+                        const labelY = startY - 15; // Move label higher above arrow
                         label.setAttribute('x', labelX);
                         label.setAttribute('y', labelY);
                         label.setAttribute('text-anchor', 'middle');
                         label.setAttribute('class', 'evolution-label');
                         label.textContent = 'evolving';
                         label.style.pointerEvents = 'none';
+                        label.style.fontSize = '0.7rem';
+                        label.style.fontWeight = '500';
+                        label.style.fill = 'var(--warning)';
+                        label.style.opacity = '0.8';
 
                         svg.appendChild(label);
                     }
