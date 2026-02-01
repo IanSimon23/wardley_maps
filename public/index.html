@@ -2663,17 +2663,17 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
 
                 svg.innerHTML = `
                     <defs>
-                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                            <polygon points="0 0, 10 3, 0 6" fill="#4a9eff" />
+                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                            <polygon points="0 0, 10 5, 0 10" fill="#4a9eff" />
                         </marker>
-                        <marker id="arrowhead-highlighted" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                            <polygon points="0 0, 10 3, 0 6" fill="#4a9eff" style="filter: drop-shadow(0 0 4px #4a9eff);" />
+                        <marker id="arrowhead-highlighted" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                            <polygon points="0 0, 10 5, 0 10" fill="#4a9eff" style="filter: drop-shadow(0 0 4px #4a9eff);" />
                         </marker>
-                        <marker id="arrowhead-dimmed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                            <polygon points="0 0, 10 3, 0 6" fill="#64748b" opacity="0.15" />
+                        <marker id="arrowhead-dimmed" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                            <polygon points="0 0, 10 5, 0 10" fill="#64748b" opacity="0.15" />
                         </marker>
-                        <marker id="arrowhead-delete" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                            <polygon points="0 0, 10 3, 0 6" fill="#ef4444" />
+                        <marker id="arrowhead-delete" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                            <polygon points="0 0, 10 5, 0 10" fill="#ef4444" />
                         </marker>
                         <marker id="evolution-arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
                             <polygon points="0 0, 8 3, 0 6" fill="#f59e0b" />
@@ -2681,16 +2681,37 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                     </defs>
                 `;
 
+                // Debug: Check if markers exist after innerHTML set
+                setTimeout(() => {
+                    console.log('Markers after innerHTML:', {
+                        arrowhead: document.getElementById('arrowhead'),
+                        evolutionArrowhead: document.getElementById('evolution-arrowhead'),
+                        svgDefs: svg.querySelector('defs'),
+                        allMarkers: svg.querySelectorAll('marker')
+                    });
+                }, 100);
+
                 // Draw dependency connections
                 this.connections.forEach(conn => {
                     const fromNode = this.nodes.find(n => n.id === conn.from);
                     const toNode = this.nodes.find(n => n.id === conn.to);
 
                     if (fromNode && toNode) {
+                        // Calculate center points
                         const x1 = fromNode.x + 60;
                         const y1 = fromNode.y + 35;
-                        const x2 = toNode.x + 60;
-                        const y2 = toNode.y + 35;
+                        const x2Center = toNode.x + 60;
+                        const y2Center = toNode.y + 35;
+
+                        // Calculate angle to target
+                        const dx = x2Center - x1;
+                        const dy = y2Center - y1;
+                        const angle = Math.atan2(dy, dx);
+
+                        // Stop the line at the edge of the target component (roughly 70px from center)
+                        const stopDistance = 70;
+                        const x2 = x2Center - Math.cos(angle) * stopDistance;
+                        const y2 = y2Center - Math.sin(angle) * stopDistance;
 
                         const midX = (x1 + x2) / 2;
                         const midY = (y1 + y2) / 2;
@@ -2711,6 +2732,10 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
                         const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                         line.setAttribute('d', d);
                         line.setAttribute('class', 'connection-line');
+                        line.setAttribute('fill', 'none');
+                        line.setAttribute('stroke', '#4a9eff');
+                        line.setAttribute('stroke-width', '2');
+                        line.setAttribute('stroke-dasharray', '5,5');
                         line.setAttribute('marker-end', 'url(#arrowhead)');
                         line.setAttribute('data-from', conn.from);
                         line.setAttribute('data-to', conn.to);
@@ -2747,6 +2772,14 @@ Keep responses concise (2-3 paragraphs max) unless deep analysis is requested.`
 
                         svg.appendChild(hitArea);
                         svg.appendChild(line);
+
+                        console.log('Created connection:', {
+                            from: fromNode.label,
+                            to: toNode.label,
+                            hitArea: hitArea,
+                            line: line,
+                            markerEnd: line.getAttribute('marker-end')
+                        });
                     }
                 });
 
